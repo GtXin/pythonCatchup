@@ -77,6 +77,7 @@ status: active
 > - `[new filetype]`: file format purpose, syntax, and repo usage.
 > - `[example]`: compact sample code, config, command, or data.
 > - `[convention]`: naming, style, layout, or team-agreed coding/documentation convention.
+> - `[function]`: function purpose, input/output behavior, and minimal call example.
 
 > [concept] **Live session**
 >
@@ -1826,61 +1827,1793 @@ pip install -r requirements.txt
 
 ### 5.d Control Flow
 
+> [concept] **Control flow** is the order in which code runs. The critical use: it lets code choose branches, repeat work, stop early, skip cases, and transform collections.
+>
+> > [example] Control-flow shape
+> >
+> > ```python
+> > if condition:
+> >     run_this()
+> > else:
+> >     run_that()
+> > ```
+> >
+> > Python uses indentation to define the block. There are no `{}` braces for normal control-flow blocks.
+
+> [concept] **`if` / `elif` / `else`** chooses one branch based on conditions.
+>
+> > [example] Branching
+> >
+> > ```python
+> > signal_score = 0.73
+> >
+> > if signal_score > 0.8:
+> >     action = "strong_buy"
+> > elif signal_score > 0.5:
+> >     action = "watch"
+> > else:
+> >     action = "ignore"
+> > ```
+> >
+> > `elif` means "else if." Python checks branches top to bottom and runs the first true branch.
+
+> [concept] **An iterable** is an object Python can give one item at a time. The critical use: `for` loops and comprehensions work on iterables, not only lists.
+>
+> > [example] Common iterables
+> >
+> > ```python
+> > for item in [1, 2, 3]:      # list
+> >     print(item)
+> >
+> > for item in (1, 2, 3):      # tuple
+> >     print(item)
+> >
+> > for item in {1, 2, 3}:      # set
+> >     print(item)
+> >
+> > for key in {"a": 1, "b": 2}:  # dict loops over keys
+> >     print(key)
+> >
+> > for char in "AAPL":         # string
+> >     print(char)
+> > ```
+> >
+> > Iterable means "can be looped over." List is one iterable type, not the only one.
+>
+> > [note] A `str` is iterable character by character. Looping over `"AAPL"` yields `"A"`, `"A"`, `"P"`, then `"L"`.
+
+> [concept] **`for` loops** repeat code over items from an iterable.
+>
+> > [example] Loop over instruments
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT", "NVDA"]
+> >
+> > for instrument in instruments:
+> >     print(instrument)
+> > ```
+> >
+> > The loop variable `instrument` is rebound on each iteration.
+
+> [concept] **`while` loops** repeat while a condition remains true. Use them when the number of iterations is not naturally known upfront.
+>
+> > [example] While loop
+> >
+> > ```python
+> > retries = 0
+> >
+> > while retries < 3:
+> >     print("try", retries)
+> >     retries += 1
+> > ```
+> >
+> > In data scripts, prefer `for` when iterating over a known collection.
+
+> [concept] **`break` and `continue`** control loop progress. `break` exits the loop. `continue` skips the rest of the current iteration and moves to the next one.
+>
+> > [example] Stop or skip
+> >
+> > ```python
+> > instruments = ["AAPL", "BAD", "MSFT"]
+> >
+> > for instrument in instruments:
+> >     if instrument == "BAD":
+> >         continue
+> >
+> >     if instrument == "MSFT":
+> >         break
+> >
+> >     print(instrument)
+> > ```
+> >
+> > Use `continue` for invalid cases. Use `break` when the loop's purpose is already finished.
+
+> [concept] **Comprehensions** create collections from existing iterables in one expression.
+>
+> > [example] List comprehension
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT", "NVDA"]
+> > lower_names = [name.lower() for name in instruments]
+> > ```
+> >
+> > Use comprehensions for simple transformations or filters. Use normal loops when logic becomes multi-step.
+>
+> > [example] Filter with comprehension
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT", "NVDA"]
+> > selected = [name for name in instruments if name != "MSFT"]
+> > ```
+
+> [note] Python control flow depends on indentation. A wrong indent changes program meaning or raises `IndentationError`.
+
 ### 5.e Frequent Built-In Functions
+
+> [concept] **Built-in functions** are functions available from Python immediately, without importing a module. The critical use: they are the small standard tools used constantly for inspection, conversion, looping, and basic calculation.
+>
+> > [example] Built-in function call shape
+> >
+> > ```python
+> > result = function_name(input_value)
+> > ```
+
+> [function] `len()`
+>
+> > [concept] `len()` returns the number of items in a container or iterable-like object.
+> >
+> > [example]
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT", "NVDA"]
+> > count = len(instruments)
+> > print(count)
+> > ```
+
+> [function] `type()`
+>
+> > [concept] `type()` returns the object's data type/class.
+> >
+> > [example]
+> >
+> > ```python
+> > price = 101.25
+> > print(type(price))
+> > ```
+
+> [function] `isinstance()`
+>
+> > [concept] `isinstance()` checks whether an object belongs to a type/category. Use this for type checks instead of `is`.
+> >
+> > [example]
+> >
+> > ```python
+> > price = 101.25
+> >
+> > if isinstance(price, float):
+> >     print("price is a float")
+> > ```
+
+> [function] `range()`
+>
+> > [concept] `range()` creates an iterable sequence of integers, usually for looping a fixed number of times.
+> >
+> > [example]
+> >
+> > ```python
+> > for i in range(3):
+> >     print(i)
+> > ```
+
+> [function] `enumerate()`
+>
+> > [concept] `enumerate()` loops over an iterable while also giving the item index.
+> >
+> > [example]
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT", "NVDA"]
+> >
+> > for index, instrument in enumerate(instruments):
+> >     print(index, instrument)
+> > ```
+
+> [function] `zip()`
+>
+> > [concept] `zip()` pairs items from multiple iterables by position.
+> >
+> > [example]
+> >
+> > ```python
+> > instruments = ["AAPL", "MSFT"]
+> > prices = [101.25, 220.50]
+> >
+> > price_by_instrument = dict(zip(instruments, prices))
+> > ```
+
+> [function] `sorted()`
+>
+> > [concept] `sorted()` returns a new sorted list without changing the original iterable.
+> >
+> > [example]
+> >
+> > ```python
+> > universe = {"MSFT", "AAPL", "NVDA"}
+> > ordered = sorted(universe)
+> > print(ordered)
+> > ```
+
+> [function] `sum()`, `min()`, `max()`
+>
+> > [concept] `sum()`, `min()`, and `max()` calculate basic aggregate values from numeric or comparable items.
+> >
+> > [example]
+> >
+> > ```python
+> > returns = [0.01, -0.02, 0.03]
+> >
+> > print(sum(returns))
+> > print(min(returns))
+> > print(max(returns))
+> > ```
 
 ### 5.f Functions
 
+> [concept] **A function** is a named block of reusable behavior. The critical use: functions create clear boundaries around inputs, outputs, and side effects so code can be tested, reused, and moved from `scripts/` into `src/`.
+>
+> > [example] Define and call a function
+> >
+> > ```python
+> > def calculate_return(today_price: float, yesterday_price: float) -> float:
+> >     return today_price / yesterday_price - 1
+> >
+> >
+> > result = calculate_return(103.0, 100.0)
+> > print(result)
+> > ```
+> >
+> > `def` defines the function. `return` sends a value back to the caller. `calculate_return(...)` calls the function.
+
+> [concept] **Parameters and arguments** are related but not identical. A parameter is the name in the function definition. An argument is the actual value passed during a call.
+>
+> > [example] Parameter vs argument
+> >
+> > ```python
+> > def normalize_score(score: float) -> float:
+> >     return score / 100
+> >
+> >
+> > normalized = normalize_score(73.0)
+> > ```
+> >
+> > `score` is the parameter. `73.0` is the argument.
+
+> [concept] **Return value** is the object a function sends back to its caller. If a function has no explicit `return`, Python returns `None`.
+>
+> > [example] Return value
+> >
+> > ```python
+> > def make_label(instrument: str, field: str) -> str:
+> >     return instrument + "_" + field
+> >
+> >
+> > label = make_label("AAPL", "close")
+> > ```
+>
+> > [example] Implicit `None`
+> >
+> > ```python
+> > def print_label(label: str) -> None:
+> >     print(label)
+> >
+> >
+> > result = print_label("AAPL_close")
+> > print(result)
+> > ```
+> >
+> > `print_label(...)` prints text as a side effect and returns `None`.
+
+> [concept] **Default arguments** give a parameter a fallback value when the caller does not provide one.
+>
+> > [example] Default argument
+> >
+> > ```python
+> > def is_large_move(return_value: float, threshold: float = 0.05) -> bool:
+> >     return abs(return_value) > threshold
+> >
+> >
+> > print(is_large_move(0.07))
+> > print(is_large_move(0.07, threshold=0.10))
+> > ```
+> >
+> > Defaults are useful for common settings, but important research/config choices should still be visible at call sites.
+
+> [concept] **Pure functions and side effects** are different. A pure function only uses inputs to produce a return value. A side effect changes something outside the function, such as printing, writing a file, mutating a list, or logging.
+>
+> > [example] Pure function
+> >
+> > ```python
+> > def calculate_market_value(price: float, shares: int) -> float:
+> >     return price * shares
+> > ```
+>
+> > [example] Side effect
+> >
+> > ```python
+> > def add_instrument(instruments: list[str], instrument: str) -> None:
+> >     instruments.append(instrument)
+> > ```
+> >
+> > Prefer pure functions for reusable logic because they are easier to test. Use side effects at clear boundaries such as scripts, file I/O, logging, or explicit mutation helpers.
+
+> [concept] **Function boundaries** are engineering boundaries. The critical use: a good function name plus typed inputs and outputs makes Qlib-facing code easier to wrap, test, and debug.
+>
+> > [example] Good boundary
+> >
+> > ```python
+> > def build_feature_names(base_fields: list[str], windows: list[int]) -> list[str]:
+> >     names = []
+> >
+> >     for field in base_fields:
+> >         for window in windows:
+> >             names.append(f"{field}_{window}d")
+> >
+> >     return names
+> > ```
+> >
+> > Inputs are explicit, output is explicit, and the function does not depend on hidden global state.
+
 ### 5.g Imports, Modules, And Packages
+
+> [concept] **A module** is usually one `.py` file that Python can import. The critical use: modules let reusable code live in one file and be used from another file.
+>
+> > [example] Module shape
+> >
+> > ```text
+> > src/catchup/returns.py
+> > ```
+> >
+> > If `returns.py` defines `calculate_return`, other code can import that function.
+
+> [concept] **A package** is a folder of importable Python modules. The critical use: packages organize related reusable code under one namespace.
+>
+> > [example] Package shape
+> >
+> > ```text
+> > src/catchup/
+> >   returns.py
+> >   features.py
+> >   qlib_wrapper.py
+> > ```
+> >
+> > `catchup` is the package namespace. `returns`, `features`, and `qlib_wrapper` are modules inside it.
+
+> [note] Practical import ontology: package = importable folder; module = importable `.py` file; functions/classes/constants = names defined inside a module. Good practice for this repo: put reusable functions/classes in modules under `src/catchup/`, then import those names from scripts or tests. Do not treat the whole repo as one global function search space.
+
+> [concept] **`import`** loads code from a module or package into the current Python file. The critical use: import is how scripts, tests, and modules reuse behavior without copying code.
+>
+> > [example] Import styles
+> >
+> > ```python
+> > import math
+> > from pathlib import Path
+> > from catchup.returns import calculate_return
+> > ```
+> >
+> > `import math` loads the module. `from pathlib import Path` imports one name from a module. `from catchup.returns import calculate_return` imports a project function from a package module.
+>
+> > [note] Python does not search globally for overlapping function names. It finds the module/package path first, then looks for the requested name inside that module. `catchup.returns.calculate_return` and `catchup.math_utils.calculate_return` are different full names. If both are imported as local name `calculate_return`, the later import rebinds that local name.
+>
+> > [note] When same-name functions/classes exist, keep the module namespace visible. Prefer `import catchup.returns as returns` and call `returns.calculate_return(...)` instead of importing multiple same-name functions into one local name.
+
+> [concept] **Import path** is where Python looks for modules/packages. The critical use: import errors often mean Python is using the wrong environment, wrong working directory, or wrong package layout.
+>
+> > [example] Check import search paths
+> >
+> > ```python
+> > import sys
+> >
+> > for path in sys.path:
+> >     print(path)
+> > ```
+> >
+> > In this repo, use `uv run python ...` from `C:\pythonCatchup` so Python runs inside the repo environment.
+
+> [concept] **`src` layout** keeps importable project code under `src/`. The critical use: it separates reusable package code from scripts, tests, notes, and data files.
+>
+> > [example] Repo import boundary
+> >
+> > ```text
+> > scripts/run_demo.py        # runnable command
+> > src/catchup/returns.py     # reusable importable code
+> > tests/test_returns.py      # tests reusable code
+> > ```
+> >
+> > Scripts should import from `catchup`; reusable logic should not depend on scripts.
+
+> [decision] Import rules for this repo:
+> - Use standard-library imports first.
+> - Use third-party imports second.
+> - Use local `catchup` imports third.
+> - Avoid importing from `scripts/`.
+> - Move reusable logic into `src/catchup/` before testing or reusing it.
+
+> [note] Common import error: `ModuleNotFoundError` means Python cannot find the requested module/package from the current environment and import path. First check interpreter, `.venv`, working directory, and package location.
 
 ### 5.h Errors And Exceptions
 
+> [concept] **An exception** is an error object raised during runtime. The critical use: exceptions let code stop normal flow when something invalid happens and report what went wrong.
+>
+> > [example] Exception object
+> >
+> > ```python
+> > error = ValueError("price must be positive")
+> > raise error
+> > ```
+> >
+> > `ValueError` is an exception class. `ValueError(...)` constructs an exception object. `raise` throws it.
+
+> [concept] **`raise`** starts the error path. Use it when a function detects invalid input or an impossible state.
+>
+> > [example] Raise on invalid input
+> >
+> > ```python
+> > def validate_price(price: float) -> None:
+> >     if price <= 0:
+> >         raise ValueError("price must be positive")
+> > ```
+> >
+> > Positive price returns normally. Zero or negative price raises `ValueError`.
+>
+> > [note] Scope/call-stack insight: the `raise` statement is written inside the function and creates the exception object there, but the exception does not remain local like a normal variable. It exits the function abnormally and travels up the call stack until a matching `except` catches it or the program stops with a stack trace.
+
+> [concept] **`try` / `except`** handles an exception instead of letting it crash the program. The critical use: catch only errors you can handle meaningfully.
+>
+> > [example] Catch a specific error
+> >
+> > ```python
+> > try:
+> >     validate_price(-1.0)
+> > except ValueError as exc:
+> >     print("invalid price:", exc)
+> > ```
+> >
+> > `exc` is the caught exception object. Catching `ValueError` does not catch every possible error type.
+
+> [concept] **Common exception types** communicate the kind of failure.
+>
+> > [example] Common built-in exceptions
+> >
+> > ```python
+> > ValueError("bad value")              # valid type, invalid value
+> > TypeError("wrong type")              # operation used with wrong type
+> > KeyError("missing_key")              # dict key missing
+> > IndexError("index out of range")      # list/tuple index missing
+> > FileNotFoundError("file missing")     # path does not exist
+> > ModuleNotFoundError("module missing") # import failed
+> > ```
+
+> [concept] **Fail fast** means raise an error close to the bad input instead of letting wrong state travel deeper into the program. The critical use: in data/QLib workflows, early validation prevents silent bad results.
+>
+> > [example] Fail fast
+> >
+> > ```python
+> > def calculate_return(today_price: float, yesterday_price: float) -> float:
+> >     if yesterday_price <= 0:
+> >         raise ValueError("yesterday_price must be positive")
+> >
+> >     return today_price / yesterday_price - 1
+> > ```
+>
+> > [note] Raise exceptions at the invariant or axiom level: the earliest place where code knows a required truth has been violated. Examples: price must be positive, path must exist, date range must be valid, required config key must exist, DataFrame must contain `trade_date`, or universe must not be empty.
+
+> [concept] **Exception handling boundary** is where code decides whether to recover, log, retry, or stop. Reusable functions should usually raise clear exceptions; scripts may catch them to print/log a clean message.
+>
+> > [example] Script-level handling
+> >
+> > ```python
+> > def main() -> None:
+> >     try:
+> >         result = calculate_return(103.0, 0.0)
+> >         print(result)
+> >     except ValueError as exc:
+> >         print("failed:", exc)
+> >
+> >
+> > if __name__ == "__main__":
+> >     main()
+> > ```
+
+> [note] Avoid broad `except Exception:` unless there is a clear boundary reason, such as logging a top-level script failure before re-raising or exiting. Broad catches can hide real bugs.
+
 ### 5.i File I/O And Paths
+
+> [concept] **File I/O** means reading from and writing to files. The critical use: Python workflows need to load configs/data, write artifacts, inspect logs, and pass local paths into tools like Qlib.
+>
+> > [example] Read text
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > path = Path("data/README.md")
+> > text = path.read_text(encoding="utf-8")
+> > print(text)
+> > ```
+
+> [concept] **Read/write modes** define how Python opens a file. The critical use: mode controls whether Python reads existing content, overwrites content, appends content, or fails if the file is missing.
+>
+> > [example] Common modes
+> >
+> > ```python
+> > with open("data/README.md", "r", encoding="utf-8") as file:
+> >     text = file.read()
+> >
+> > with open("data/processed/summary.txt", "w", encoding="utf-8") as file:
+> >     file.write("new summary\n")
+> >
+> > with open("data/processed/summary.txt", "a", encoding="utf-8") as file:
+> >     file.write("append one more line\n")
+> > ```
+> >
+> > `"r"` reads, `"w"` writes and overwrites, `"a"` appends. `with open(...)` closes the file automatically.
+
+> [concept] **String matching after read** checks whether loaded text contains expected content. The critical use: quick validation for config files, logs, notes, and small text outputs.
+>
+> > [example] Basic string matching
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > text = Path("data/README.md").read_text(encoding="utf-8")
+> >
+> > if "raw" in text:
+> >     print("mentions raw data")
+> >
+> > if text.startswith("#"):
+> >     print("markdown heading")
+> >
+> > for line in text.splitlines():
+> >     if "data" in line.lower():
+> >         print(line)
+> > ```
+> >
+> > Use `in` for containment, `.startswith()` for prefix checks, `.endswith()` for suffix checks, and `.splitlines()` to inspect line by line.
+
+> [concept] **`pathlib.Path`** is Python's standard-library path object. The critical use: it represents filesystem paths cleanly across Windows/macOS/Linux instead of manually gluing strings together.
+>
+> > [example] Build paths
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > repo_root = Path("C:/pythonCatchup")
+> > raw_data = repo_root / "data" / "raw"
+> > file_path = raw_data / "prices.csv"
+> > ```
+> >
+> > `/` joins path parts when using `Path` objects. It is not division in this context.
+
+> [concept] **Relative paths and absolute paths** describe where a file lives. Relative paths start from the current working directory. Absolute paths start from a drive/root.
+>
+> > [example] Relative vs absolute
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > relative_path = Path("data/raw/prices.csv")
+> > absolute_path = Path("C:/pythonCatchup/data/raw/prices.csv")
+> > ```
+> >
+> > In scripts, know the current working directory before trusting a relative path.
+
+> [concept] **File existence checks** validate an invariant before reading or writing. The critical use: fail early with a clear error instead of crashing deeper with vague data problems.
+>
+> > [example] Validate path
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > path = Path("data/raw/prices.csv")
+> >
+> > if not path.exists():
+> >     raise FileNotFoundError(f"missing file: {path}")
+> > ```
+
+> [concept] **Writing files** creates or replaces external state on disk. The critical use: treat writes as side effects and keep output paths explicit.
+>
+> > [example] Write text
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > output_path = Path("data/processed/summary.txt")
+> > output_path.parent.mkdir(parents=True, exist_ok=True)
+> > output_path.write_text("done\n", encoding="utf-8")
+> > ```
+> >
+> > `parent.mkdir(...)` ensures the containing folder exists before writing the file.
+
+> [decision] Path rules for this repo:
+> - Use `pathlib.Path` for path handling.
+> - Keep machine-specific paths in environment variables or config, not hardcoded in reusable code.
+> - Use `data/raw/` for raw input data and `data/processed/` for generated/intermediate data.
+> - Validate paths before passing them into Qlib or pandas.
+
+> [note] Windows accepts backslashes, but Python strings treat `\` as an escape character. Prefer `Path("C:/pythonCatchup/data")`, raw strings like `r"C:\pythonCatchup\data"`, or environment/config values.
 
 ### 5.j Classes And OOP
 
+> [concept] **Class sample use**: a class is a blueprint for creating objects that bundle state and behavior. The critical use: use a class when a thing has memory/state plus operations that naturally belong to that state.
+>
+> > [example] Small complete class
+> >
+> > ```python
+> > class ReturnThreshold:
+> >     def __init__(self, threshold: float) -> None:
+> >         self.threshold = threshold
+> >
+> >     def is_large_move(self, return_value: float) -> bool:
+> >         return abs(return_value) > self.threshold
+> >
+> >
+> > checker = ReturnThreshold(0.05)
+> > print(checker.is_large_move(0.07))
+> > ```
+> >
+> > `ReturnThreshold` is the class. `checker` is an instance/object. `threshold` is object state. `is_large_move(...)` is behavior attached to that state.
+
+> [concept] **Members / attributes** are names stored on an object or class. The critical use: attributes hold state that methods can read or update.
+>
+> > [example] Instance attributes
+> >
+> > ```python
+> > class QlibDataConfig:
+> >     def __init__(self, provider_uri: str, region: str) -> None:
+> >         self.provider_uri = provider_uri
+> >         self.region = region
+> >
+> >
+> > config = QlibDataConfig("C:/qlib_data", "us")
+> > print(config.provider_uri)
+> > ```
+> >
+> > `self.provider_uri` and `self.region` are instance attributes. Each instance can hold different values.
+>
+> > [example] Class attribute
+> >
+> > ```python
+> > class QlibDataConfig:
+> >     default_region = "us"
+> >
+> >     def __init__(self, provider_uri: str) -> None:
+> >         self.provider_uri = provider_uri
+> > ```
+> >
+> > `default_region` belongs to the class object. Use class attributes for shared constants, not per-instance changing state.
+
+> [concept] **Methods** are functions defined inside a class. The critical use: methods operate on object state through `self`.
+>
+> > [example] Method reads state
+> >
+> > ```python
+> > class FeatureBuilder:
+> >     def __init__(self, windows: list[int]) -> None:
+> >         self.windows = windows
+> >
+> >     def names_for_field(self, field: str) -> list[str]:
+> >         return [f"{field}_{window}d" for window in self.windows]
+> >
+> >
+> > builder = FeatureBuilder([5, 10, 20])
+> > print(builder.names_for_field("return"))
+> > ```
+> >
+> > A method call like `builder.names_for_field("return")` passes `builder` as `self` automatically.
+>
+> > [note] Method call has parentheses because code runs. Attribute access has no parentheses because it reads stored state: `builder.windows`.
+
+> [concept] **Constructor / `__init__`** initializes a new instance after Python allocates the object. The critical use: put required setup and invariant validation there.
+>
+> > [example] Constructor validation
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> >
+> > class DataPaths:
+> >     def __init__(self, raw_dir: Path, processed_dir: Path) -> None:
+> >         if not raw_dir.exists():
+> >             raise FileNotFoundError(f"missing raw_dir: {raw_dir}")
+> >
+> >         self.raw_dir = raw_dir
+> >         self.processed_dir = processed_dir
+> > ```
+> >
+> > `DataPaths(...)` calls `__init__`. Python does not use C++-style overloaded constructors; use defaults, class methods, or separate factory functions when needed.
+
+> [concept] **Destructor / cleanup** exists as `__del__`, but it is rarely the right tool. The critical use: clean up external resources explicitly with `with` context managers or explicit `.close()` methods.
+>
+> > [example] Prefer context manager for files
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > path = Path("data/README.md")
+> >
+> > with path.open("r", encoding="utf-8") as file:
+> >     text = file.read()
+> > ```
+> >
+> > The `with` block handles cleanup deterministically. Do not rely on `__del__` for important file/network/resource cleanup.
+
+> [concept] **`self` vs C++ `this`**: `self` is the current instance, but Python makes it explicit as the first method parameter. The critical use: any method that reads or writes instance state needs `self`.
+>
+> > [example] Explicit `self`
+> >
+> > ```python
+> > class Counter:
+> >     def __init__(self) -> None:
+> >         self.count = 0
+> >
+> >     def increment(self) -> None:
+> >         self.count += 1
+> > ```
+> >
+> > C++ has implicit `this`; Python writes `self` explicitly by convention.
+
+> [concept] **Public / private** in Python is mostly convention, not compiler enforcement. The critical use: communicate intended API boundaries clearly.
+>
+> > [example] Visibility conventions
+> >
+> > ```python
+> > class QlibRunner:
+> >     def run_backtest(self) -> None:
+> >         self._initialize_provider()
+> >
+> >     def _initialize_provider(self) -> None:
+> >         print("internal helper")
+> > ```
+> >
+> > `run_backtest` is public API. `_initialize_provider` is internal by convention. Python will not stop outside code from calling `_initialize_provider`, but the underscore says "do not depend on this."
+>
+> > [note] Double underscore names like `__secret` trigger name mangling. They are not normal C++-style private members. Use single underscore for most internal implementation details.
+
+> [concept] **Inheritance / base class** lets a subclass reuse or specialize behavior from a parent class. The critical use: use it only when there is a real "is-a" relationship or a shared interface.
+>
+> > [example] Base class and override
+> >
+> > ```python
+> > class BaseValidator:
+> >     def validate(self, value: object) -> None:
+> >         if value is None:
+> >             raise ValueError("value is required")
+> >
+> >
+> > class PriceValidator(BaseValidator):
+> >     def validate(self, value: object) -> None:
+> >         super().validate(value)
+> >
+> >         if not isinstance(value, int | float):
+> >             raise TypeError("price must be numeric")
+> >
+> >         if value <= 0:
+> >             raise ValueError("price must be positive")
+> > ```
+> >
+> > `PriceValidator` inherits from `BaseValidator`. `super().validate(value)` calls the base-class method.
+>
+> > [note] A child class does not need to rewrite every base method. If the child does not define a method, Python searches the base class and uses the inherited method directly. If the child defines the same method name, it overrides the base method; the child can still call the base version with `super()`.
+> >
+> > ```python
+> > class BaseValidator:
+> >     def reject_missing(self, value: object) -> None:
+> >         if value is None:
+> >             raise ValueError("value is required")
+> >
+> >
+> > class PriceValidator(BaseValidator):
+> >     # No reject_missing method here; inherited method is used directly.
+> >     def validate(self, price: float) -> None:
+> >         self.reject_missing(price)
+> > ```
+>
+> > [example] Multiple inheritance and MRO
+> >
+> > ```python
+> > class BaseA:
+> >     def setup(self) -> None:
+> >         print("BaseA")
+> >         super().setup()
+> >
+> >
+> > class BaseB:
+> >     def setup(self) -> None:
+> >         print("BaseB")
+> >         super().setup()
+> >
+> >
+> > class Root:
+> >     def setup(self) -> None:
+> >         print("Root")
+> >
+> >
+> > class Child(BaseA, BaseB, Root):
+> >     def setup(self) -> None:
+> >         print("Child")
+> >         super().setup()
+> >
+> >
+> > child = Child()
+> > child.setup()
+> > print(Child.__mro__)
+> > ```
+> >
+> > Python supports multiple inheritance with `class Child(BaseA, BaseB):`. In that case, `super()` means "call the next method in the method resolution order," not simply "call my one parent." Check the order with `Child.__mro__`.
+
+> [concept] **Virtual / polymorphism** in Python is dynamic by default. The critical use: Python does not need a `virtual` keyword; method lookup happens at runtime based on the actual object.
+>
+> > [example] Runtime dispatch
+> >
+> > ```python
+> > class CsvLoader:
+> >     def load(self) -> str:
+> >         return "csv data"
+> >
+> >
+> > class QlibLoader:
+> >     def load(self) -> str:
+> >         return "qlib data"
+> >
+> >
+> > def run_loader(loader) -> None:
+> >     print(loader.load())
+> >
+> >
+> > run_loader(CsvLoader())
+> > run_loader(QlibLoader())
+> > ```
+> >
+> > `run_loader` only needs an object with a `.load()` method. This is duck typing: if it behaves like the needed interface, Python can use it.
+
+> [concept] **Composition** means one object owns or uses another object. The critical use: prefer composition over inheritance for Qlib wrappers because external systems are dependencies, not parents.
+>
+> > [example] Composition for workflow
+> >
+> > ```python
+> > class DataLoader:
+> >     def load(self) -> list[float]:
+> >         return [100.0, 101.0, 103.0]
+> >
+> >
+> > class ResearchWorkflow:
+> >     def __init__(self, loader: DataLoader) -> None:
+> >         self.loader = loader
+> >
+> >     def run(self) -> None:
+> >         prices = self.loader.load()
+> >         print(prices)
+> >
+> >
+> > workflow = ResearchWorkflow(loader=DataLoader())
+> > workflow.run()
+> > ```
+> >
+> > `ResearchWorkflow` uses a `DataLoader`; it does not inherit from it.
+>
+> > [note] Dependency-boundary reason: external tools like Qlib are dependencies, not object identity. Composition keeps Qlib behind a narrow interface you own, makes testing easier with fake runners/loaders, and protects repo code from external API changes.
+
+> [concept] **Dataclasses** are standard-library classes for mostly-data objects. The critical use: use `@dataclass` for typed config or record objects before writing manual constructor boilerplate.
+>
+> > [example] Dataclass config
+> >
+> > ```python
+> > from dataclasses import dataclass
+> > from pathlib import Path
+> >
+> >
+> > @dataclass
+> > class DataPaths:
+> >     raw_dir: Path
+> >     processed_dir: Path
+> >
+> >
+> > paths = DataPaths(
+> >     raw_dir=Path("data/raw"),
+> >     processed_dir=Path("data/processed"),
+> > )
+> > ```
+> >
+> > A dataclass automatically creates a constructor and readable representation for simple data containers.
+>
+> > [example] Dataclass with defaults
+> >
+> > ```python
+> > from dataclasses import dataclass
+> >
+> >
+> > @dataclass
+> > class ModelConfig:
+> >     model_name: str
+> >     learning_rate: float = 0.05
+> >     num_leaves: int = 64
+> >
+> >
+> > config = ModelConfig(model_name="lightgbm")
+> > print(config.learning_rate)
+> > ```
+> >
+> > `model_name` is required. `learning_rate` and `num_leaves` have default values.
+>
+> > [example] Generated representation and equality
+> >
+> > ```python
+> > from dataclasses import dataclass
+> >
+> >
+> > @dataclass
+> > class Instrument:
+> >     symbol: str
+> >     exchange: str
+> >
+> >
+> > a = Instrument("AAPL", "NASDAQ")
+> > b = Instrument("AAPL", "NASDAQ")
+> >
+> > print(a)
+> > print(a == b)
+> > ```
+> >
+> > Dataclass generates readable `repr` output and value-style equality by field values.
+>
+> > [example] Approximate generated constructor
+> >
+> > ```python
+> > @dataclass
+> > class DataPaths:
+> >     raw_dir: Path
+> >     processed_dir: Path
+> > ```
+> >
+> > Roughly becomes:
+> >
+> > ```python
+> > def __init__(self, raw_dir: Path, processed_dir: Path) -> None:
+> >     self.raw_dir = raw_dir
+> >     self.processed_dir = processed_dir
+> > ```
+> >
+> > `@dataclass` reads annotated class-level fields and turns them into constructor parameters and instance attributes.
+
+> [decision] Class rules for this repo:
+> - Use functions first when behavior is stateless.
+> - Use dataclasses for config/data objects.
+> - Use classes when state and behavior must travel together.
+> - Prefer composition over inheritance for Qlib wrappers/workflows.
+> - Keep Qlib-specific details behind a small wrapper interface.
+> - Avoid large classes that mix config, data loading, model training, backtesting, logging, plotting, and file output.
+
 ### 5.k Frequent Standard Library Tools
+
+#### 5.k.1 Standard Library Concept
+
+> [concept] **The standard library** is the set of modules included with Python itself. The critical use: reach for standard-library tools first when they solve the problem cleanly, because they require no extra `uv` or `pip` install.
+>
+> > [example] Standard-library imports
+> >
+> > ```python
+> > from pathlib import Path  # filesystem paths
+> > import json               # JSON read/write
+> > import logging            # runtime messages
+> > from datetime import date  # dates
+> > ```
+> >
+> > These modules come with Python and do not belong in `requirements.txt`.
+
+#### 5.k.2 `pathlib`
+
+> [concept] **`pathlib`** provides `Path`, a filesystem path class. The critical use: represent paths as objects with methods instead of fragile strings.
+>
+> > [example] Path object
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > repo_root = Path("C:/pythonCatchup")
+> > data_file = repo_root / "data" / "raw" / "prices.csv"  # join path parts
+> >
+> > print(data_file.exists())  # check whether path exists
+> > print(data_file.parent)    # containing folder
+> > ```
+
+#### 5.k.3 `os`
+
+> [concept] **`os`** exposes operating-system interaction. The critical use: read environment variables and inspect process-level OS state.
+>
+> > [example] Environment variable
+> >
+> > ```python
+> > import os
+> >
+> > provider_uri = os.environ.get("QLIB_PROVIDER_URI")  # returns None if missing
+> >
+> > if provider_uri is None:
+> >     raise ValueError("QLIB_PROVIDER_URI is not set")
+> > ```
+> >
+> > Use `os.environ[...]` for required env vars and `os.environ.get(...)` when missing is acceptable.
+
+#### 5.k.4 `json`
+
+> [concept] **`json`** reads and writes JSON text. The critical use: JSON is common for structured config, small metadata, and machine-readable output.
+>
+> > [example] Write and read JSON
+> >
+> > ```python
+> > import json
+> > from pathlib import Path
+> >
+> > config = {"benchmark": "SPY", "lookback_days": 20}
+> > path = Path("data/processed/config.json")
+> >
+> > path.parent.mkdir(parents=True, exist_ok=True)  # ensure output folder exists
+> > path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+> >
+> > loaded = json.loads(path.read_text(encoding="utf-8"))
+> > print(loaded["benchmark"])
+> > ```
+
+#### 5.k.5 `logging`
+
+> [concept] **`logging`** provides structured runtime messages. The critical use: replace durable `print()` progress messages in scripts/workflows with level-based logs.
+>
+> > [example] Basic logging
+> >
+> > ```python
+> > import logging
+> >
+> > logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+> >
+> > logging.info("starting workflow")
+> > logging.warning("missing values detected")
+> > logging.error("workflow failed")
+> > ```
+> >
+> > Use `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL` to mark severity.
+
+#### 5.k.6 `datetime`
+
+> [concept] **`datetime`** provides date and time objects. The critical use: avoid treating dates as arbitrary strings when logic depends on ordering, ranges, or calendar math.
+>
+> > [example] Date objects
+> >
+> > ```python
+> > from datetime import date
+> >
+> > start = date(2020, 1, 1)
+> > end = date(2020, 12, 31)
+> >
+> > print(start < end)
+> > print(start.isoformat())
+> > ```
+> >
+> > `date(2020, 1, 1)` creates a date object. `.isoformat()` returns `"2020-01-01"`.
+
+#### 5.k.7 `argparse`
+
+> [concept] **`argparse`** parses command-line arguments for scripts. The critical use: turn hardcoded script settings into explicit terminal inputs.
+>
+> > [example] Script arguments
+> >
+> > ```python
+> > import argparse
+> >
+> > parser = argparse.ArgumentParser()
+> > parser.add_argument("--provider-uri", required=True)  # required CLI option
+> > parser.add_argument("--region", default="us")         # optional CLI option
+> >
+> > args = parser.parse_args()
+> > print(args.provider_uri)
+> > print(args.region)
+> > ```
+> >
+> > Run shape: `uv run python scripts/run_demo.py --provider-uri C:/qlib_data`.
+
+#### 5.k.8 `dataclasses`
+
+> [concept] **`dataclasses`** generates boilerplate methods for mostly-data classes. The critical use: make config/record objects explicit without manually writing repetitive constructors.
+>
+> > [example] Config dataclass
+> >
+> > ```python
+> > from dataclasses import dataclass
+> > from pathlib import Path
+> >
+> >
+> > @dataclass
+> > class DataConfig:
+> >     provider_uri: Path
+> >     region: str = "us"
+> >
+> >
+> > config = DataConfig(provider_uri=Path("C:/qlib_data"))
+> > print(config)
+> > ```
+> >
+> > `@dataclass` reads annotated fields and generates `__init__`, `__repr__`, and `__eq__` by default.
+
+#### 5.k.9 `typing`
+
+> [concept] **`typing`** provides tools for type hints. The critical use: make function boundaries, config shapes, and wrapper interfaces easier for humans and tools to reason about.
+>
+> > [example] Type hints
+> >
+> > ```python
+> > from typing import Literal
+> >
+> >
+> > Region = Literal["us", "cn"]
+> >
+> >
+> > def normalize_region(region: Region) -> Region:
+> >     return region
+> > ```
+> >
+> > Use built-in generics like `list[str]` and `dict[str, float]` first. Reach for `typing` when you need richer type concepts such as `Literal`, `Protocol`, or `TypedDict`.
 
 ### 5.l Pandas Frequent Functions And Use
 
+> [concept] **Pandas frequent functions** are table operations used to inspect, select, clean, combine, and transform `DataFrame` data. The critical use: most quant data bugs are table-form bugs, not syntax bugs.
+
+#### 5.l.1 Inspection Functions
+
+> [function] `head()`, `tail()`, `shape`, `dtypes`, `info()`, `describe()`
+>
+> > [concept] Inspection functions reveal table form: rows, columns, types, missing values, and value ranges.
+> >
+> > [example]
+> >
+> > ```python
+> > print(df.head())      # first 5 rows
+> > print(df.tail())      # last 5 rows
+> > print(df.shape)       # (row_count, column_count)
+> > print(df.dtypes)      # column data types
+> > print(df.info())      # compact schema/memory summary
+> > print(df.describe())  # numeric summary statistics
+> > ```
+> >
+> > Use these before trusting a transformation result.
+
+#### 5.l.2 Selection And Filtering
+
+> [function] Column selection, boolean masks, `loc`, `iloc`
+>
+> > [concept] Selection chooses columns or rows from a `DataFrame`. The critical use: isolate the data slice you intend before calculating.
+> >
+> > [example]
+> >
+> > ```python
+> > prices = df["price"]                         # one column as Series
+> > subset = df[["instrument", "trade_date"]]    # selected columns
+> >
+> > mask = df["instrument"] == "AAPL"            # boolean Series
+> > aapl_rows = df.loc[mask]                     # rows by label/mask
+> >
+> > first_row = df.iloc[0]                       # row by integer position
+> > ```
+> >
+> > Use `.loc` for label/mask selection. Use `.iloc` for integer-position selection.
+
+#### 5.l.3 Missing Values
+
+> [function] `isna()`, `notna()`, `dropna()`, `fillna()`
+>
+> > [concept] Missing-value functions detect or handle absent data. The critical use: missing values can silently change signals, joins, rolling windows, and model inputs.
+> >
+> > [example]
+> >
+> > ```python
+> > print(df.isna().sum())          # missing count by column
+> >
+> > clean = df.dropna(subset=["price"])  # remove rows missing price
+> > filled = df.fillna({"volume": 0})    # fill missing volume with 0
+> > valid = df[df["price"].notna()]      # keep rows with price
+> > ```
+> >
+> > Do not fill missing values mechanically. Decide whether missing means unknown, zero, unavailable, or invalid.
+
+#### 5.l.4 Sorting And Indexing
+
+> [function] `sort_values()`, `set_index()`, `reset_index()`
+>
+> > [concept] Sorting and indexing define row order and lookup structure. The critical use: time-series operations like `shift`, `pct_change`, and `rolling` depend on correct order.
+> >
+> > [example]
+> >
+> > ```python
+> > ordered = df.sort_values(["instrument", "trade_date"])
+> > indexed = ordered.set_index(["instrument", "trade_date"])
+> > flat = indexed.reset_index()
+> > ```
+> >
+> > For quant data, sort by instrument and date before calculating time-based features.
+
+#### 5.l.5 Groupby And Aggregation
+
+> [function] `groupby()`, `agg()`, `transform()`
+>
+> > [concept] Groupby splits a table into groups, applies logic per group, then combines results. The critical use: calculate per-instrument statistics without mixing instruments.
+> >
+> > [example]
+> >
+> > ```python
+> > avg_price = df.groupby("instrument")["price"].mean()
+> >
+> > summary = df.groupby("instrument").agg(
+> >     price_mean=("price", "mean"),
+> >     row_count=("price", "size"),
+> > )
+> >
+> > df["price_zscore_input"] = df.groupby("instrument")["price"].transform("mean")
+> > ```
+> >
+> > Use `agg()` when the output is one row per group. Use `transform()` when the output should align back to the original rows.
+
+#### 5.l.6 Merge And Join
+
+> [function] `merge()`, `join()`
+>
+> > [concept] Merge/join combines tables by keys. The critical use: combine features, labels, metadata, and calendars without changing row meaning accidentally.
+> >
+> > [example]
+> >
+> > ```python
+> > merged = prices.merge(
+> >     sectors,
+> >     on="instrument",
+> >     how="left",
+> >     validate="many_to_one",
+> > )
+> > ```
+> >
+> > `on` is the key, `how` controls join behavior, and `validate` catches unexpected duplicate-key relationships.
+>
+> > [note] After every merge, check `shape`, duplicate keys, and missing values in newly joined columns.
+
+#### 5.l.7 Shift, Rolling, And Percent Change
+
+> [function] `shift()`, `rolling()`, `pct_change()`
+>
+> > [concept] These functions create time-series features and labels. The critical use: they must be applied within the right instrument group and date order.
+> >
+> > [example]
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > df["return_1d"] = df.groupby("instrument")["price"].pct_change()
+> > df["future_return_1d"] = df.groupby("instrument")["price"].shift(-1) / df["price"] - 1
+> > df["rolling_mean_5d"] = (
+> >     df.groupby("instrument")["price"]
+> >     .rolling(5)
+> >     .mean()
+> >     .reset_index(level=0, drop=True)
+> > )
+> > ```
+> >
+> > `pct_change()` calculates percentage change. `shift(-1)` looks forward and is label-like; use carefully to avoid leakage.
+
+#### 5.l.8 Save And Load DataFrames
+
+> [function] `read_csv()`, `to_csv()`, `read_parquet()`, `to_parquet()`
+>
+> > [concept] Save/load functions move `DataFrame` data between memory and disk. The critical use: make intermediate outputs inspectable and reproducible.
+> >
+> > [example]
+> >
+> > ```python
+> > import pandas as pd
+> > from pathlib import Path
+> >
+> > path = Path("data/processed/features.csv")
+> > path.parent.mkdir(parents=True, exist_ok=True)
+> >
+> > df.to_csv(path, index=False)       # write DataFrame
+> > loaded = pd.read_csv(path)         # read DataFrame
+> > ```
+> >
+> > Use CSV for easy inspection. Use parquet later for larger typed data when dependencies and workflow are ready.
+
 ### 5.m Software Engineering Basics
 
-### 5.n Mini Exercises
+#### 5.m.1 Separation Of Concerns
+
+> [concept] **Separation of concerns** means each module/function/class has one clear responsibility. The critical use: Qlib-facing code stays understandable when data loading, feature building, training, backtesting, logging, and file output are not tangled together.
+>
+> > [example] Separate responsibilities
+> >
+> > ```text
+> > src/catchup/data_loader.py      # load data
+> > src/catchup/features.py         # build features
+> > src/catchup/qlib_runner.py      # call Qlib
+> > scripts/run_backtest.py         # command-style runner
+> > ```
+> >
+> > A script can orchestrate steps, but reusable logic should live in small modules.
+
+#### 5.m.2 Config Vs Code
+
+> [concept] **Config vs code** means settings should be separated from behavior. The critical use: paths, dates, model names, and parameters should change without editing core Python logic.
+>
+> > [example] Config shape
+> >
+> > ```python
+> > config = {
+> >     "provider_uri": "C:/qlib_data",  # machine-specific setting
+> >     "start_date": "2020-01-01",      # experiment setting
+> >     "model_name": "lightgbm",        # model choice
+> > }
+> > ```
+> >
+> > Keep stable behavior in functions/classes. Keep changing values in config, environment variables, or CLI arguments.
+
+#### 5.m.3 Dependency Boundaries
+
+> [concept] **Dependency boundaries** isolate external tools behind code you own. The critical use: Qlib, pandas, and file formats can change; your repo should expose a smaller stable interface.
+>
+> > [example] Boundary shape
+> >
+> > ```python
+> > class QlibRunner:
+> >     def run_backtest(self, config_path: str) -> None:
+> >         # Qlib-specific calls stay hidden inside this wrapper.
+> >         print("run qlib backtest", config_path)
+> > ```
+> >
+> > Callers depend on `QlibRunner.run_backtest(...)`, not scattered Qlib internals.
+
+#### 5.m.4 Testing Strategy
+
+> [concept] **Testing strategy** decides which behavior deserves automated protection. The critical use: tests preserve meaning when code changes.
+>
+> > [example] Test reusable logic first
+> >
+> > ```python
+> > def calculate_return(today_price: float, yesterday_price: float) -> float:
+> >     return today_price / yesterday_price - 1
+> >
+> >
+> > def test_calculate_return():
+> >     # This expected behavior should not silently change later.
+> >     assert calculate_return(103.0, 100.0) == 0.03
+> > ```
+> >
+> > Prioritize tests for `src/catchup/` reusable functions before testing exploratory scripts.
+
+#### 5.m.5 Logging And Observability
+
+> [concept] **Observability** means the program leaves enough runtime evidence to understand what happened. The critical use: long Qlib/data workflows need stage-level logs, not only final success/failure.
+>
+> > [example] Stage logging
+> >
+> > ```python
+> > import logging
+> >
+> > logging.info("load data")
+> > logging.info("build features")
+> > logging.info("train model")
+> > logging.info("run backtest")
+> > ```
+> >
+> > Log workflow stages, key paths, row counts, and output artifact locations.
+
+#### 5.m.6 Reproducible Scripts
+
+> [concept] **Reproducible scripts** can be rerun with the same inputs and produce understandable outputs. The critical use: Qlib experiments should not depend on hidden terminal state or hand-edited code paths.
+>
+> > [example] Reproducible script inputs
+> >
+> > ```powershell
+> > uv run python scripts/run_backtest.py --config configs/demo.json
+> > ```
+> >
+> > A good script makes input config, environment, output path, and command visible.
+
+#### 5.m.7 Refactoring Signals
+
+> [concept] **Refactoring signals** are signs code should be reshaped without changing behavior. The critical use: refactor before a script becomes a hard-to-test pile of hidden assumptions.
+>
+> > [example] Signals
+> >
+> > ```text
+> > repeated code appears in multiple places
+> > a function needs many unrelated arguments
+> > one script mixes loading, cleaning, modeling, plotting, and saving
+> > a local variable would be useful in tests
+> > a Qlib-specific call appears in many modules
+> > ```
+> >
+> > Common moves: extract function, extract module, introduce dataclass config, add wrapper, or move logic from `scripts/` to `src/catchup/`.
+
 
 ## 6. NumPy And Pandas For Financial Data
 
-### 6.a Goal
+### 6.a Under the hood - Qlib
 
-### 6.b Key Concepts
+> [concept] **Financial data in Python** usually moves between two forms: NumPy arrays for numeric matrix-style computation, and pandas `DataFrame` objects for labeled table/time-series work. The critical use: know when you need raw numeric speed versus labeled data safety.
+>
+> > [example] Mental split
+> >
+> > ```text
+> > NumPy array      -> numeric matrix/vector operations
+> > pandas DataFrame -> rows, columns, dates, instruments, labels
+> > ```
+> >
+> > For Qlib prep, pandas is the main inspection/manipulation layer; NumPy is the numeric engine underneath many operations.
 
-### 6.c Examples
+### 6.b NumPy Arrays
 
-### 6.d Common Mistakes
+> [concept] **A NumPy array** is a typed numeric container optimized for vectorized computation. The critical use: use arrays when operations are mostly numeric and shape-based.
+>
+> > [example] Array and vectorized math
+> >
+> > ```python
+> > import numpy as np
+> >
+> > prices = np.array([100.0, 101.0, 103.0])
+> > returns = prices[1:] / prices[:-1] - 1  # vectorized return calculation
+> >
+> > print(returns)
+> > ```
+> >
+> > `prices[1:]` means all prices except the first. `prices[:-1]` means all prices except the last.
 
-### 6.e Mini Exercise
+### 6.c DataFrame Price Tables
+
+> [concept] **A financial `DataFrame`** is usually a table with instrument, date/time, and numeric fields such as price, volume, return, feature, or label. The critical use: preserve the labels that explain what each number means.
+>
+> > [example] Price table
+> >
+> > ```python
+> > import pandas as pd
+> >
+> > df = pd.DataFrame(
+> >     {
+> >         "instrument": ["AAPL", "AAPL", "MSFT"],
+> >         "trade_date": ["2020-01-02", "2020-01-03", "2020-01-02"],
+> >         "close": [100.0, 101.0, 220.0],
+> >         "volume": [1000, 1200, 900],
+> >     }
+> > )
+> > ```
+> >
+> > `instrument + trade_date` often acts like the row identity for daily market data.
+
+### 6.d Returns
+
+> [concept] **Return** measures relative price change. The critical use: most quant features, labels, and performance metrics are based on returns rather than raw prices.
+>
+> > [example] Scalar return
+> >
+> > ```python
+> > yesterday_price = 100.0
+> > today_price = 103.0
+> >
+> > daily_return = today_price / yesterday_price - 1
+> > print(daily_return)
+> > ```
+> >
+> > `103 / 100 - 1 = 0.03`, meaning the price increased by `3%`.
+>
+> > [example] Single-instrument pandas return
+> >
+> > ```python
+> > import pandas as pd
+> >
+> > df = pd.DataFrame(
+> >     {
+> >         "trade_date": ["2020-01-01", "2020-01-02", "2020-01-03"],
+> >         "close": [100.0, 103.0, 101.0],
+> >     }
+> > )
+> >
+> > df["return_1d"] = df["close"].pct_change()
+> > ```
+> >
+> > First row return is missing because there is no previous price. `101 / 103 - 1 = -0.0194`.
+>
+> > [example] One-period return
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > df["return_1d"] = df.groupby("instrument")["close"].pct_change()
+> > ```
+> >
+> > Group by `instrument` before `pct_change()` so one stock's return does not use another stock's previous row.
+
+### 6.e Grouped Time Series
+
+> [concept] **Grouped time-series operations** apply calculations separately per instrument. The critical use: financial panels contain many instruments, and each instrument has its own time sequence.
+>
+> > [example] Per-instrument previous close
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > df["prev_close"] = df.groupby("instrument")["close"].shift(1)
+> > df["return_1d"] = df["close"] / df["prev_close"] - 1
+> > ```
+> >
+> > `shift(1)` looks one row backward inside each instrument group.
+>
+> > [example] Independent grouped time-series example
+> >
+> > ```python
+> > import pandas as pd
+> >
+> > # One table has four rows: two AAPL dates and two MSFT dates.
+> > # Expected unique instruments: AAPL, MSFT.
+> > prices = pd.DataFrame(
+> >     {
+> >         "instrument": ["AAPL", "MSFT", "AAPL", "MSFT"],
+> >         "trade_date": ["2020-01-01", "2020-01-01", "2020-01-02", "2020-01-02"],
+> >         "close": [100.0, 200.0, 103.0, 198.0],
+> >     }
+> > )
+> >
+> > # Sort inside each instrument's timeline before using time-series operations.
+> > # Expected order after sort: AAPL rows together by date, then MSFT rows by date.
+> > prices = prices.sort_values(["instrument", "trade_date"])
+> >
+> > # Shift separately inside each instrument group.
+> > # Expected change: first row for each instrument gets prev_close = NaN.
+> > prices["prev_close"] = prices.groupby("instrument")["close"].shift(1)
+> >
+> > # Calculate return using the instrument's own previous close.
+> > # Expected values: AAPL second row = 103 / 100 - 1 = 0.03;
+> > # MSFT second row = 198 / 200 - 1 = -0.01.
+> > prices["return_1d"] = prices["close"] / prices["prev_close"] - 1
+> >
+> > print(prices)
+> > ```
+> >
+> > Without `groupby("instrument")`, `shift(1)` could cross from one instrument to another and create false returns.
+
+### 6.f Rolling Windows
+
+> [concept] **Rolling windows** calculate statistics over recent history. The critical use: many factors use trailing means, volatility, momentum, or volume averages.
+>
+> > [example] Five-day moving average
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > df["close_ma_5"] = (
+> >     df.groupby("instrument")["close"]
+> >     .rolling(5)
+> >     .mean()
+> >     .reset_index(level=0, drop=True)
+> > )
+> > ```
+> >
+> > The `reset_index(...)` step realigns the rolling result back to the original row index.
+
+### 6.g Alignment And Leakage (Future back to yesterday)
+
+> [concept] **Alignment** means features, labels, dates, and instruments refer to the intended same row/event. The critical use: misalignment creates silent wrong results.
+>
+> > [example] Future return label
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > next_close = df.groupby("instrument")["close"].shift(-1)
+> > df["future_return_1d"] = next_close / df["close"] - 1
+> > ```
+> >
+> > `shift(-1)` looks forward and is label-like. Do not use future-looking columns as features.
+
+> [concept] **Leakage** means future information enters the feature side of a model. The critical use: leakage can make backtests look good while being unusable in real trading.
+
+### 6.h Missing Values And Outliers
+
+> [concept] **Missing values and outliers** are data-state problems, not only cleaning chores. The critical use: missing prices, zero volume, bad dates, and extreme values can distort returns and factors.
+>
+> > [example] Basic checks
+> >
+> > ```python
+> > print(df.isna().sum())                 # missing values by column
+> > print(df["close"].describe())          # range and distribution
+> > print((df["volume"] <= 0).sum())       # suspicious volume rows
+> > ```
+> >
+> > Decide what missing means before using `fillna()`.
+
+### 6.i Save Intermediate Data
+
+> [concept] **Intermediate data artifacts** are saved tables between workflow stages. The critical use: they make feature/label generation inspectable and reproducible.
+>
+> > [example] Save feature table
+> >
+> > ```python
+> > from pathlib import Path
+> >
+> > output_path = Path("data/processed/features.csv")
+> > output_path.parent.mkdir(parents=True, exist_ok=True)
+> >
+> > df.to_csv(output_path, index=False)
+> > ```
+> >
+> > Use CSV first for inspection. Use parquet later when data is large and typed storage matters.
 
 ## 7. Quant Research Concepts
 
 ### 7.a Instruments
 
+> [concept] **Instrument** means the tradable object being observed or traded. The critical use: most market data rows are keyed by `instrument` plus time.
+>
+> > [example] Instrument examples
+> >
+> > ```text
+> > AAPL  -> Apple stock
+> > MSFT  -> Microsoft stock
+> > SPY   -> ETF
+> > BTC   -> crypto asset
+> > ES    -> futures contract
+> > ```
+> >
+> > In a daily price table, `instrument + trade_date` often identifies one row.
+
 ### 7.b Features
+
+> [concept] **Features** are input variables used by a model or rule. The critical use: features represent information known at decision time.
+>
+> > [example] Feature columns
+> >
+> > ```text
+> > return_5d
+> > volume_zscore
+> > close_ma_20
+> > volatility_20d
+> > ```
+> >
+> > Feature columns should not use future information.
 
 ### 7.c Labels
 
+> [concept] **Labels** are target values the model tries to predict. The critical use: labels usually look forward in time, while features must not.
+>
+> > [example] Future-return label
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> >
+> > next_close = df.groupby("instrument")["close"].shift(-1)  # future close
+> > df["label_return_1d"] = next_close / df["close"] - 1
+> > ```
+> >
+> > `shift(-1)` is acceptable for labels, but dangerous for features.
+
 ### 7.d Factors
+
+> [concept] **Factor** usually means a signal or explanatory variable believed to relate to future returns. The critical use: factors are candidate features or ranked signals used in quant research.
+>
+> > [example] Simple momentum factor
+> >
+> > ```python
+> > df = df.sort_values(["instrument", "trade_date"])
+> > df["momentum_5d"] = df.groupby("instrument")["close"].pct_change(5)
+> > ```
+> >
+> > A factor is not automatically alpha. It must be tested.
+>
+> > [concept] **Feature vs factor**: a feature is any model input column; a factor is a finance/quant signal with an economic or statistical hypothesis about future returns. A factor used in a model becomes a feature, but not every feature is a meaningful factor.
+> >
+> > [example] Feature/factor distinction
+> >
+> > ```text
+> > momentum_5d        -> factor and feature if fed into model
+> > volume_zscore      -> factor-like feature
+> > day_of_week        -> feature, not necessarily a finance factor
+> > missing_value_flag -> feature for data quality, not a return factor
+> > ```
 
 ### 7.e Alpha
 
+> [concept] **Alpha** is useful predictive edge after accounting for benchmark, risk, costs, and implementation constraints. The critical use: alpha is what remains after a signal survives realistic evaluation.
+>
+> > [example] Practical distinction
+> >
+> > ```text
+> > factor = candidate signal
+> > alpha  = signal that appears to add tradable predictive value
+> > ```
+> >
+> > A backtest with no transaction costs or leakage checks does not prove alpha.
+
 ### 7.f Universe
+
+> [concept] **Universe** is the set of instruments eligible for research or trading. The critical use: universe choice controls what the model can see, rank, buy, or ignore.
+>
+> > [example] Universe
+> >
+> > ```python
+> > universe = {"AAPL", "MSFT", "NVDA"}
+> >
+> > tradable_rows = df[df["instrument"].isin(universe)]
+> > ```
+> >
+> > Universe rules should be explicit because changing the universe changes the research result.
 
 ### 7.g Benchmark
 
+> [concept] **Benchmark** is the reference portfolio or index used to judge performance. The critical use: strategy return alone is incomplete; compare against what could have been earned passively.
+>
+> > [example] Benchmark examples
+> >
+> > ```text
+> > SPY      -> broad US equity ETF benchmark
+> > S&P 500  -> large-cap US stock index
+> > cash     -> no-risk/no-position reference
+> > ```
+> >
+> > Excess return means strategy return minus benchmark return.
+
 ### 7.h Rebalance
+
+> [concept] **Rebalance** means updating portfolio holdings at scheduled times or when rules trigger. The critical use: rebalance frequency affects turnover, costs, risk, and whether signals are implementable.
+>
+> > [example] Rebalance schedule
+> >
+> > ```text
+> > daily rebalance   -> update holdings every trading day
+> > weekly rebalance  -> update once per week
+> > monthly rebalance -> update once per month
+> > ```
+> >
+> > More frequent rebalance can react faster but usually increases transaction costs.
 
 ### 7.i Transaction Costs
 
+> [concept] **Transaction costs** are the costs of trading, including commissions, bid/ask spread, slippage, taxes, and market impact. The critical use: costs can turn a good-looking signal into an untradable one.
+>
+> > [example] Cost intuition
+> >
+> > ```text
+> > gross return = before trading costs
+> > net return   = after trading costs
+> > ```
+> >
+> > High-turnover strategies need stricter cost assumptions.
+
 ### 7.j Drawdown
 
-### 7.k Information Coefficient
+> [concept] **Drawdown** measures decline from a previous portfolio peak. The critical use: drawdown describes pain/risk that average return alone hides.
+>
+> > [example] Drawdown intuition
+> >
+> > ```text
+> > portfolio peak = 100
+> > current value  = 80
+> > drawdown       = 80 / 100 - 1 = -20%
+> > ```
+> >
+> > Maximum drawdown is the worst peak-to-trough decline over a period.
+
+### 7.k Information Coefficient 
+
+> [concept] **Information Coefficient (IC)** measures correlation between a signal and future return. The critical use: IC checks whether higher signal scores tend to correspond to higher future returns.
+>
+> > [example] IC intuition
+> >
+> > ```text
+> > signal_score high -> future_return tends to be high
+> > positive IC       -> signal ranking has predictive direction
+> > near-zero IC      -> signal has little rank relationship
+> > negative IC       -> signal may be inverted or wrong
+> > ```
+> >
+> > IC is often measured cross-sectionally by date, then averaged over time.
 
 ## 8. ML Workflow Basics
 

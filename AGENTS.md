@@ -50,9 +50,11 @@ This repo is a Python and Qlib catch-up workspace. The main learning artifact is
   - `> [new filetype]` for file format purpose, syntax, and where that file type is used in the repo.
   - `> [example]` for compact code, config, command, or data examples that illustrate a concept without becoming a full workflow.
   - `> [convention]` for naming, style, layout, or team-agreed coding/documentation conventions.
+  - `> [function]` for function purpose, input/output behavior, and minimal call example.
 - Use nested quotes inside a workflow for syntax details or short explanations.
 - Use nested `> > [example]` blocks when an example belongs inside another tag such as `> [new filetype]`.
 - Annotate examples with short inline comments when the syntax may be unfamiliar, especially config formats like TOML.
+- When adding code examples for a new or non-obvious concept, include concise comments inside the code to explain the key lines. Keep comments useful, not noisy; prioritize OOP, imports, exceptions, decorators, config files, and data transformations.
 - Keep `[new filetype]` examples focused on file contents or syntax. Put commands that act on the file in `[workflow]` or `[execution]`, not inside the filetype example.
 - Treat tags as independent building blocks. Tags may be nested recursively when useful, but nesting is optional and should clarify rather than create rigid hierarchy.
 - Add a `> [concept]` definition where an important term first appears. Later sections may refer back to it instead of redefining it.
