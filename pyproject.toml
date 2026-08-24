@@ -1,0 +1,20 @@
+[project]
+name = "pythonCatchup"
+version = "0.1.0"
+description = "Python refresh and Qlib kickoff workspace."
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
