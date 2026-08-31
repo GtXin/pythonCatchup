@@ -1,11 +1,9 @@
 {
   "editor.formatOnSave": true,
-  "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
   "python.analysis.typeCheckingMode": "basic",
   "ruff.importStrategy": "fromEnvironment",
-  "ruff.interpreter": [".venv/Scripts/python.exe"],
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true

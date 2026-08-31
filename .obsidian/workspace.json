@@ -83,7 +83,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "62a7ed8ed01ac779",
@@ -190,6 +191,13 @@
   },
   "active": "b81c6480e9d3279f",
   "lastOpenFiles": [
+    "pythonNotes.1788155588.bak.md",
+    "pythonNotes.1788155237.bak.md",
+    "pythonNotes.1788155183.bak.md",
+    "pythonNotes.1788154676.bak.md",
+    "pythonNotes.1788154577.bak.md",
+    "pythonNotes.1788141814.bak.md",
+    "codexMemeory.md",
     "pythonNotes.1788140339.bak.md",
     "pythonNotes.1788139251.bak.md",
     "pythonNotes.1788138843.bak.md",
@@ -209,13 +217,6 @@
     "pythonNotes.1787539175.bak.md",
     "pythonNotes.1787538994.bak.md",
     "pythonNotes.1787538693.bak.md",
-    "pythonNotes.1787538662.bak.md",
-    "pythonNotes.1787537889.bak.md",
-    "pythonNotes.1787537630.bak.md",
-    "pythonNotes.1787537553.bak.md",
-    "pythonNotes.1787537459.bak.md",
-    "pythonNotes.1787537423.bak.md",
-    "pythonNotes.1787537226.bak.md",
     "pytest-cache-files-asj0g35s",
     "scripts/hello_ruff.py",
     "Pasted image 20260823134428.png",

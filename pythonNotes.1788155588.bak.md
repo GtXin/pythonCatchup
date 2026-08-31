@@ -122,7 +122,49 @@ status: active
 
 ## 2. Environment Setup
 
-### 2.a Tool Choice
+### 2.a GitHub Management And Platform-Independent Arrangement
+
+> [concept] **Platform-independent repo management** means GitHub stores the project recipe and source files, while each operating system builds its own local runtime environment. The critical use: Windows and macOS can share the same codebase without sharing incompatible local folders like `.venv`.
+
+> [decision] Cross-platform GitHub rule
+>
+> - Commit source code, notes, dependency manifests, lock files, tests, and portable editor settings.
+> - Do not commit virtual environments, local secrets, downloaded datasets, caches, or machine-specific VS Code interpreter paths.
+> - Use `uv run ...` as the shared command style across Windows PowerShell and macOS `zsh`.
+> - Let each machine create its own `.venv` from the committed dependency files.
+
+> [workflow] Keep one GitHub repo usable on Windows and macOS
+>
+> - Step 1: commit the environment recipe, not the environment.
+>   - System: GitHub repo.
+>   - Path: `pyproject.toml`, `requirements.txt`, `uv.lock`.
+>   - Verify: dependency files are tracked, but `.venv/` is ignored.
+>
+> - Step 2: keep local runtime folders out of Git.
+>   - System: Git ignore rules.
+>   - Path: `.gitignore`.
+>   - Verify: `.venv/`, `.env`, caches, and local data folders are ignored.
+>
+> - Step 3: avoid committed OS-specific VS Code interpreter paths.
+>   - System: VS Code workspace settings.
+>   - Path: `.vscode/settings.json`.
+>   - Verify: no committed setting points only to `.venv\Scripts\python.exe` or only to `.venv/bin/python`.
+>
+> - Step 4: create the local `.venv` separately on each machine.
+>   - System: Windows PowerShell or macOS `zsh`.
+>   - Path: repo-local `.venv/`.
+>   - Verify: `uv run python --version` works on that machine.
+>
+> - Step 5: run repo commands through `uv run`.
+>   - System: Python command runner.
+>   - Path: repo root.
+>   - Verify: `uv run pytest` and `uv run ruff check .` work without manually activating `.venv`.
+
+> [note] A Windows `.venv` and a macOS `.venv` are not the same artifact. Windows has `.venv\Scripts\python.exe`; macOS has `.venv/bin/python`. GitHub should share the recipe that rebuilds them, not either environment folder.
+
+> [note] Current repo issue to watch: `.vscode/settings.json` contains Windows-specific interpreter settings. Harmonize by removing committed interpreter paths or moving machine-specific settings to each local VS Code user/workspace state.
+
+### 2.b Tool Choice
 
 > [concept] **`uv`** is a fast Python project tool: Python version manager, virtual environment creator, package installer, and command runner.
 
@@ -162,11 +204,13 @@ status: active
 >   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
 >   - Verify: `.venv` exists and `python --version` works inside the activated environment.
 
-### 2.b Install uv
+### 2.c Install uv
 
 > [concept] **`cmd` and PowerShell** are both Windows shells. A shell is a program that takes user commands and asks the operating system to run programs, manage files, and set environment variables. PowerShell is newer and better for scripting.
 
 > [concept] **`zsh`** is the default macOS shell. A shell is a program that takes user commands and asks the operating system to run programs, manage files, and set environment variables.
+
+> [concept] **`bash`** is another common shell, especially on Linux and older macOS setups. The critical use: many terminal examples online are written for `bash`; most basic commands also work in `zsh`, but shell-specific syntax can differ.
 
 #### Windows
 
@@ -249,7 +293,7 @@ status: active
 
 > [note] If VS Code was already open before installing `uv`, close and reopen VS Code so the integrated terminal reloads the updated PATH.
 
-### 2.c Python Version
+### 2.d Python Version
 
 > [concept] **Python version** matters because package compatibility, Qlib examples, and local tooling can behave differently across versions.
 
@@ -322,9 +366,9 @@ status: active
 
 > [note] The Mac global `python3` may be newer than the repo target. Use `uv run python` or `.venv/bin/python` for this repo instead of relying on global `python3`.
 
-### 2.d Create Virtual Environment (optional if already created)
+### 2.e Create Virtual Environment (optional if already created)
 
-> [concept] **Creating `.venv`** makes the repo-local Python environment explicit. In this repo, `.venv` may already exist because `uv run python --version` created it during `2.c`.
+> [concept] **Creating `.venv`** makes the repo-local Python environment explicit. In this repo, `.venv` may already exist because `uv run python --version` created it during `2.d`.
 
 #### Windows
 
@@ -433,7 +477,7 @@ status: active
 
 > [note] On macOS, venv executables live in `.venv/bin/`, not `.venv\Scripts\`.
 
-### 2.e Install Dependencies
+### 2.f Install Dependencies
 
 > [concept] **Runtime** is the program that actually runs code. For this repo, the Python runtime should be `C:\pythonCatchup\.venv\Scripts\python.exe` or `uv run python`.
 
@@ -538,7 +582,7 @@ status: active
 >   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/`.
 >   - Verify: both commands print versions.
 
-### 2.f Run Commands
+### 2.g Run Commands
 
 #### Windows
 
@@ -564,7 +608,7 @@ status: active
 >   - Path: `C:\pythonCatchup\`.
 >   - Verify: Ruff formats files or reports they are unchanged.
 
-> [execution] `2.f` command run summary
+> [execution] `2.g` command run summary
 >
 > - Command: `uv run python --version`
 > - Result: `Python 3.11.16`
@@ -600,7 +644,7 @@ status: active
 >   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
 >   - Verify: Ruff reports files are formatted or lists files needing format.
 
-### 2.g Fallback Without uv
+### 2.h Fallback Without uv
 
 #### Windows
 
@@ -624,7 +668,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2.h VS Code Terminal Verification
+### 2.i VS Code Terminal Verification
 
 #### Windows
 
@@ -701,6 +745,36 @@ pip install -r requirements.txt
 > - Result: `/opt/homebrew/bin/brew`
 > - Next step: install `uv`, then use `uv` to install Python 3.11 for this repo.
 
+> [execution] Mac environment setup completed
+>
+> - Command: `brew install uv`
+> - Result: installed `uv 0.12.7` with Homebrew.
+> - Command: `uv --version`
+> - Result: `uv 0.12.7 (Homebrew 2026-08-27 aarch64-apple-darwin)`.
+> - Command: `which uv`
+> - Result: `/opt/homebrew/bin/uv`.
+> - Command: `uv python install 3.11`
+> - Result: installed `CPython 3.11.16`.
+> - Command: `uv python find 3.11`
+> - Result: `/Users/coder/.local/share/uv/python/cpython-3.11-macos-aarch64-none/bin/python3.11`.
+> - Command: `uv venv --python 3.11 --prompt pythonCatchup`
+> - Result: created `.venv` with prompt `pythonCatchup`.
+> - Command: `uv sync --dev`
+> - Result: installed runtime/dev packages including `pandas==3.0.5`, `pytest==9.1.1`, `ruff==0.16.4`, and `numpy==2.4.6`.
+> - Command: `uv run python -c "import sys; print(sys.executable); print(sys.version)"`
+> - Result: executable is `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python3`; version is `Python 3.11.16`.
+> - Command: `uv run python -c "import pandas as pd; print(pd.__version__)"`
+> - Result: `3.0.5`.
+> - Command: `uv run pytest`
+> - Result: pytest ran successfully as a tool, but collected `0` tests.
+> - Command: `uv run ruff check .`
+> - Result: `All checks passed!`
+> - Command: `uv run ruff format --check .`
+> - Result: `7 files already formatted`.
+> - Check: `git check-ignore -v .venv`
+> - Result: `.venv` is ignored by `.gitignore`.
+> - File update: removed Windows-only interpreter paths from `.vscode/settings.json` so VS Code settings are platform-neutral.
+
 ## 3. VS Code IDE Setup And Code Standards
 
 ### 3.a Recommended VS Code Extensions
@@ -723,7 +797,9 @@ pip install -r requirements.txt
 
 > [note] Keep the extension set small. Add extensions only when they support the current Python/Qlib workflow.
 
-> [workflow] Install recommended VS Code extensions
+#### Windows
+
+> [workflow] Install recommended VS Code extensions on Windows from the UI
 >
 > - Step 1: install Python extension `ms-python.python`.
 >   - System: VS Code extension marketplace.
@@ -740,13 +816,14 @@ pip install -r requirements.txt
 >   - Path: VS Code Extensions panel.
 >   - Verify: `.ipynb` files open with notebook support.
 
-> [workflow] Alternative: install VS Code extensions from command line
+> [workflow] Install recommended VS Code extensions on Windows from PowerShell
 > >![[Pasted image 20260823132542.png]]
 >
 > - Step 1: check VS Code CLI with `code --version`.
 >   - System: VS Code command-line interface.
 >   - Path: `C:\Users\xinwe\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd`.
 >   - Verify: command prints VS Code version.
+>   - If missing: open VS Code, press `Ctrl + Shift + P`, run `Shell Command: Install 'code' command in PATH` if available, or reinstall VS Code with PATH integration.
 >
 > - Step 2: install Python extension with `code --install-extension ms-python.python`.
 >   - System: VS Code extension installer.
@@ -763,6 +840,50 @@ pip install -r requirements.txt
 >   - Path: VS Code user extensions folder.
 >   - Verify: expected extension IDs and versions appear.
 
+#### Mac
+
+> [workflow] Install recommended VS Code extensions on macOS from the UI
+>
+> - Step 1: install Python extension `ms-python.python`.
+>   - System: VS Code extension marketplace.
+>   - Path: VS Code Extensions panel.
+>   - Verify: Python interpreter selection and Python language features are available.
+>
+> - Step 2: install Ruff extension `charliermarsh.ruff`.
+>   - System: VS Code extension marketplace.
+>   - Path: VS Code Extensions panel.
+>   - Verify: Ruff lint/format integration appears for Python files.
+>
+> - Step 3: install Jupyter extension `ms-toolsai.jupyter` only if using notebooks.
+>   - System: VS Code extension marketplace.
+>   - Path: VS Code Extensions panel.
+>   - Verify: `.ipynb` files open with notebook support.
+
+> [workflow] Install recommended VS Code extensions on macOS from `zsh`
+>
+> - Step 1: check VS Code CLI with `code --version`.
+>   - System: VS Code command-line interface.
+>   - Path: `code` command on macOS PATH, usually installed from VS Code with `Shell Command: Install 'code' command in PATH`.
+>   - Verify: command prints VS Code version.
+>   - If missing: open VS Code, press `Cmd + Shift + P`, run `Shell Command: Install 'code' command in PATH`, then open a new terminal.
+>   - Check path: `which code` should print a path such as `/usr/local/bin/code`.
+>   - Meaning: `code` is the terminal executable that lets the shell ask VS Code to install extensions, open folders, or print its version.
+>
+> - Step 2: install Python extension with `code --install-extension ms-python.python`.
+>   - System: VS Code extension installer.
+>   - Path: VS Code user extensions folder.
+>   - Verify: command reports installed or already installed.
+>
+> - Step 3: install Ruff extension with `code --install-extension charliermarsh.ruff`.
+>   - System: VS Code extension installer.
+>   - Path: VS Code user extensions folder.
+>   - Verify: command reports installed or already installed.
+>
+> - Step 4: list relevant installed extensions with `code --list-extensions --show-versions | rg "ms-python.python|charliermarsh.ruff|ms-toolsai.jupyter"`.
+>   - System: VS Code extension registry.
+>   - Path: VS Code user extensions folder.
+>   - Verify: expected extension IDs and versions appear.
+
 > [execution] VS Code extension installation
 >
 > - Command: `code --version`
@@ -775,20 +896,23 @@ pip install -r requirements.txt
 
 ### 3.b Interpreter Selection
 
-> [concept] **VS Code interpreter selection** means choosing which `python.exe` VS Code uses for running files, debugging, resolving imports, discovering tests, and powering Python editor features.
+> [concept] **VS Code interpreter selection** means choosing which Python executable VS Code uses for running files, debugging, resolving imports, discovering tests, and powering Python editor features.
 
 > [decision] VS Code should use the repo interpreter, not global Python.
 >
-> - Repo interpreter: `C:\pythonCatchup\.venv\Scripts\python.exe`
-> - Base Python came from `uv`: `C:\Users\xinwe\AppData\Roaming\uv\python\...`
-> - Repo environment lives at: `C:\pythonCatchup\.venv\`
+> - Windows repo interpreter: `C:\pythonCatchup\.venv\Scripts\python.exe`
+> - macOS repo interpreter: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`
+> - Base Python should come from `uv`.
+> - Repo environment lives inside repo-local `.venv/`.
 > - Reason: keeps VS Code aligned with the same Python and packages used by `uv run`.
 >
-> > [note] `2.c` and `2.d` created or confirmed the interpreter. `3.b` is only about telling VS Code to use it.
+> > [note] `2.d` and `2.e` created or confirmed the interpreter. `3.b` is only about telling VS Code to use it.
 
-> [note] If running plain `python` in the VS Code PowerShell terminal, activate `.venv` first with `.venv\Scripts\Activate.ps1`. If using `uv run python`, manual activation is not required.
+> [note] If using `uv run python`, manual activation is not required. If running plain `python`, activate `.venv` first using the OS-specific activation command.
 
-> [workflow] Select repo interpreter in VS Code
+#### Windows
+
+> [workflow] Select repo interpreter in VS Code on Windows
 >
 > - Step 1: open the Command Palette with `Ctrl + Shift + P`.
 >   - System: VS Code command palette.
@@ -805,11 +929,47 @@ pip install -r requirements.txt
 >   - Path: `C:\pythonCatchup\.venv\Scripts\python.exe`.
 >   - Verify: VS Code status bar shows the `.venv` Python interpreter.
 >
-> - Step 4: verify from VS Code PowerShell terminal after activation with `python -c "import sys; print(sys.executable)"`.
+> - Step 4: verify from VS Code PowerShell terminal with `uv run python -c "import sys; print(sys.executable)"`.
 >   - System: VS Code integrated terminal and selected interpreter.
 >   - Path: `C:\pythonCatchup\.venv\Scripts\python.exe`.
 >   - Verify: printed path points to `.venv\Scripts\python.exe`.
 >   - >![[Pasted image 20260823134428.png]]
+>
+> - Step 5: if using plain `python`, activate first with `.venv\Scripts\Activate.ps1`.
+>   - System: PowerShell shell state.
+>   - Path: `C:\pythonCatchup\.venv\Scripts\Activate.ps1`.
+>   - Verify: prompt shows `(pythonCatchup)` and `python -c "import sys; print(sys.executable)"` points inside `.venv`.
+
+#### Mac
+
+> [workflow] Select repo interpreter in VS Code on macOS
+>
+> - Step 1: open the Command Palette with `Cmd + Shift + P`.
+>   - System: VS Code command palette.
+>   - Path: VS Code UI.
+>   - Verify: command search box opens.
+>
+> - Step 2: run `Python: Select Interpreter`.
+>   - System: Python extension.
+>   - Path: `ms-python.python`.
+>   - Verify: interpreter list opens.
+>
+> - Step 3: choose `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - System: VS Code Python environment selection.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - Verify: VS Code status bar shows the `.venv` Python interpreter.
+>
+> - Step 4: verify from VS Code `zsh` terminal with `uv run python -c "import sys; print(sys.executable)"`.
+>   - System: VS Code integrated terminal and repo environment.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - Verify: printed path points inside `.venv/bin/`.
+>
+> - Step 5: if using plain `python`, activate first with `source .venv/bin/activate`.
+>   - System: `zsh` shell state.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/activate`.
+>   - Verify: prompt shows `(pythonCatchup)` and `python -c "import sys; print(sys.executable)"` points inside `.venv`.
+
+> [note] Do not commit `python.defaultInterpreterPath` for only one OS. Select the interpreter locally in VS Code on each machine.
 
 ### 3.c Formatting -Ruff and VS Code Extension
 
@@ -819,7 +979,9 @@ pip install -r requirements.txt
 
 > [note] Ruff name origin: likely from "rough prototype" -> "Ruff". Treat this as historical context, not a functional concept.
 
-> [workflow] Simple path: add Ruff through `requirements.txt`
+#### Windows
+
+> [workflow] Add and verify Ruff on Windows
 >
 > - Step 1: add `ruff` to `requirements.txt`.
 >   - System: dependency manifest.
@@ -836,7 +998,7 @@ pip install -r requirements.txt
 >   - Path: `C:\pythonCatchup\.venv\Scripts\ruff.exe`.
 >   - Verify: command prints Ruff version.
 
-> [workflow] Structured path: add Ruff through `pyproject.toml`
+> [workflow] Sync structured dev tools on Windows
 >
 > - Step 1: add `ruff` under `[dependency-groups].dev`.
 >   - System: Python project metadata.
@@ -853,6 +1015,44 @@ pip install -r requirements.txt
 >   - Path: `C:\pythonCatchup\`.
 >   - Verify: Ruff reports issues, formats files, or reports unchanged files.
 
+#### Mac
+
+> [workflow] Add and verify Ruff on macOS
+>
+> - Step 1: add `ruff` to `requirements.txt`.
+>   - System: dependency manifest.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/requirements.txt`.
+>   - Verify: file contains `ruff`.
+>
+> - Step 2: install with `uv pip install -r requirements.txt`.
+>   - System: `uv` pip-compatible installer.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/ruff`.
+>   - Verify: `ruff` exists in `.venv/bin`.
+>
+> - Step 3: verify Ruff with `uv run ruff --version`.
+>   - System: `.venv` command-line tool.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/ruff`.
+>   - Verify: command prints Ruff version.
+
+> [workflow] Sync structured dev tools on macOS
+>
+> - Step 1: add `ruff` under `[dependency-groups].dev`.
+>   - System: Python project metadata.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/pyproject.toml`.
+>   - Verify: `ruff` appears in the dev dependency group.
+>
+> - Step 2: run `uv sync --dev`.
+>   - System: `uv` dependency synchronizer.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/pyproject.toml` and `/Users/coder/Public/EngineGit/pythonCatchup/uv.lock`.
+>   - Verify: `.venv` matches the locked project dependencies.
+>
+> - Step 3: verify Ruff with `uv run ruff check .` and `uv run ruff format --check .`.
+>   - System: Ruff linter and formatter.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: Ruff reports all checks passed and format status.
+
+#### Shared VS Code Settings
+
 > [new filetype] JSON is a strict key-value config/data format. In this repo, `.vscode/settings.json` stores workspace-level VS Code settings that connect the editor to `.venv`, Python, and Ruff.
 >
 > > [example] Minimal VS Code Ruff settings
@@ -860,7 +1060,6 @@ pip install -r requirements.txt
 > > ```json
 > > {
 > >   "ruff.importStrategy": "fromEnvironment",
-> >   "ruff.interpreter": [".venv/Scripts/python.exe"],
 > >   "[python]": {
 > >     "editor.defaultFormatter": "charliermarsh.ruff",
 > >     "editor.formatOnSave": true
@@ -868,48 +1067,45 @@ pip install -r requirements.txt
 > > }
 > > ```
 
-> [workflow] Connect VS Code Ruff extension to repo Ruff
+> [workflow] Connect VS Code Ruff extension to repo Ruff on both platforms
 >
 > - Step 1: set Ruff to load from the selected environment.
 >   - System: VS Code workspace settings.
->   - Path: `C:\pythonCatchup\.vscode\settings.json`.
+>   - Path: `.vscode/settings.json`.
 >   - Verify: `"ruff.importStrategy": "fromEnvironment"` is present.
 >
-> - Step 2: point Ruff extension at the repo interpreter.
->   - System: VS Code Ruff extension.
->   - Path: `C:\pythonCatchup\.venv\Scripts\python.exe`.
->   - Verify: `"ruff.interpreter": [".venv/Scripts/python.exe"]` is present.
->
-> - Step 3: set Ruff as the Python formatter.
+> - Step 2: set Ruff as the Python formatter.
 >   - System: VS Code formatter selection.
->   - Path: `C:\pythonCatchup\.vscode\settings.json`.
+>   - Path: `.vscode/settings.json`.
 >   - Verify: `[python].editor.defaultFormatter` is `charliermarsh.ruff`.
 >
-> - Step 4: verify both sides exist.
+> - Step 3: verify both sides exist.
 >   - System: VS Code extension and `.venv` command-line tool.
->   - Path: `charliermarsh.ruff` extension and `C:\pythonCatchup\.venv\Scripts\ruff.exe`.
+>   - Path: `charliermarsh.ruff` extension and repo `.venv`.
 >   - Verify: `code --list-extensions --show-versions` shows Ruff extension, and `uv run ruff --version` prints Ruff version.
+
+> [note] Do not commit `"ruff.interpreter"` when it points to one OS path. Let VS Code use the locally selected Python interpreter plus `"ruff.importStrategy": "fromEnvironment"`.
 
 > [workflow] Hello Ruff demo
 >
 > - Step 1: create a tiny Python file with one intentional lint issue.
 >   - System: repo script file.
->   - Path: `C:\pythonCatchup\scripts\hello_ruff.py`.
+>   - Path: `scripts/hello_ruff.py`.
 >   - Verify: file exists and runs.
 >
-> - Step 2: check the file with `uv run ruff check scripts\hello_ruff.py`.
+> - Step 2: check the file with `uv run ruff check scripts/hello_ruff.py`.
 >   - System: Ruff linter.
->   - Path: `C:\pythonCatchup\scripts\hello_ruff.py`.
+>   - Path: `scripts/hello_ruff.py`.
 >   - Verify: Ruff reports the unused import.
 >
-> - Step 3: fix the issue with `uv run ruff check scripts\hello_ruff.py --fix`.
+> - Step 3: fix the issue with `uv run ruff check scripts/hello_ruff.py --fix`.
 >   - System: Ruff linter auto-fix.
->   - Path: `C:\pythonCatchup\scripts\hello_ruff.py`.
+>   - Path: `scripts/hello_ruff.py`.
 >   - Verify: Ruff reports the issue fixed.
 >
 > - Step 4: format and re-check the file.
 >   - System: Ruff formatter and linter.
->   - Path: `C:\pythonCatchup\scripts\hello_ruff.py`.
+>   - Path: `scripts/hello_ruff.py`.
 >   - Verify: `ruff format` reformats if needed and `ruff check` reports all checks passed.
 
 > [execution] Installed Ruff and pytest through `pyproject.toml`
@@ -930,7 +1126,6 @@ pip install -r requirements.txt
 >
 > - File update: added Ruff workspace settings to `.vscode/settings.json`.
 > - Setting: `"ruff.importStrategy": "fromEnvironment"`
-> - Setting: `"ruff.interpreter": [".venv/Scripts/python.exe"]`
 > - Setting: `[python].editor.defaultFormatter = "charliermarsh.ruff"`
 > - Check: `.vscode/settings.json` parses as valid JSON.
 > - Check: `.venv\Scripts\ruff.exe` exists.
@@ -938,6 +1133,13 @@ pip install -r requirements.txt
 > - Result: `ruff 0.16.4`
 > - Check: `code --list-extensions --show-versions`
 > - Result: `charliermarsh.ruff@2026.74.0` and `ms-python.python@2026.4.0`
+
+> [execution] Platform-neutral VS Code settings update on macOS
+>
+> - File update: removed Windows-only `"python.defaultInterpreterPath"` from `.vscode/settings.json`.
+> - File update: removed Windows-only `"ruff.interpreter"` from `.vscode/settings.json`.
+> - Result: committed VS Code settings no longer point only to `.venv/Scripts/python.exe`.
+> - Next check in VS Code: select the local repo interpreter manually on each OS.
 
 > [execution] Hello Ruff demo
 >
@@ -964,15 +1166,95 @@ pip install -r requirements.txt
 
 > [note] No extra linting setup is needed right now. `3.c` already installed Ruff in `.venv`, installed the VS Code Ruff extension, and connected VS Code to the repo Ruff tool. In VS Code, Ruff extension coordinates linting through editor squiggles and the Problems panel; in terminal, use `uv run ruff check .`.
 
+#### Windows
+
+> [workflow] Verify linting on Windows
+>
+> - Step 1: open VS Code PowerShell terminal in the repo root.
+>   - System: VS Code integrated terminal.
+>   - Path: `C:\pythonCatchup\`.
+>   - Verify: `pwd` shows the repo root.
+>
+> - Step 2: run `uv run ruff check .`.
+>   - System: Ruff linter in repo `.venv`.
+>   - Path: `C:\pythonCatchup\`.
+>   - Verify: Ruff prints `All checks passed!` or lists concrete file/line issues.
+>
+> - Step 3: inspect VS Code Problems panel.
+>   - System: VS Code Ruff extension.
+>   - Path: VS Code Problems panel.
+>   - Verify: Ruff diagnostics match terminal findings, or the panel is empty when clean.
+
+#### Mac
+
+> [workflow] Verify linting on macOS
+>
+> - Step 1: open VS Code `zsh` terminal in the repo root.
+>   - System: VS Code integrated terminal.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: `pwd` shows the repo root.
+>
+> - Step 2: run `uv run ruff check .`.
+>   - System: Ruff linter in repo `.venv`.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: Ruff prints `All checks passed!` or lists concrete file/line issues.
+>
+> - Step 3: inspect VS Code Problems panel.
+>   - System: VS Code Ruff extension.
+>   - Path: VS Code Problems panel.
+>   - Verify: Ruff diagnostics match terminal findings, or the panel is empty when clean.
+
 ### 3.e Type Checking
 
-> [concept] **Type checking** is static reasoning about value types before code runs. Pylance is the VS Code language server that provides Python intelligence: type checking, autocomplete, hover info, go-to-definition, import analysis, and Problems panel diagnostics. Pylance lives as a VS Code extension under `C:\Users\xinwe\.vscode\extensions\`, not inside `.venv`; it reads the selected interpreter `C:\pythonCatchup\.venv\Scripts\python.exe` to understand repo packages and types.
+> [concept] **Type checking** is static reasoning about value types before code runs. Pylance is the VS Code language server that provides Python intelligence: type checking, autocomplete, hover info, go-to-definition, import analysis, and Problems panel diagnostics. Pylance lives as a VS Code extension, not inside `.venv`; it reads the locally selected repo interpreter to understand repo packages and types.
+
+> [note] Windows selected interpreter path looks like `C:\pythonCatchup\.venv\Scripts\python.exe`. macOS selected interpreter path looks like `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
 
 > [note] Type checking rationale: Ruff checks code quality and formatting, but Pylance checks type logic. It helps catch mistakes like passing `str` where `int` is expected, returning the wrong type, or forgetting to handle `None`. It becomes more useful when functions and variables have type hints.
+
+#### Windows
+
+> [workflow] Verify Pylance type checking on Windows
+>
+> - Step 1: confirm the selected interpreter is the repo interpreter.
+>   - System: VS Code Python extension.
+>   - Path: `C:\pythonCatchup\.venv\Scripts\python.exe`.
+>   - Verify: VS Code status bar points to `.venv`.
+>
+> - Step 2: confirm type checking mode.
+>   - System: VS Code workspace settings.
+>   - Path: `.vscode/settings.json`.
+>   - Verify: `"python.analysis.typeCheckingMode": "basic"` is present.
+>
+> - Step 3: open a Python file and hover over a variable or function.
+>   - System: Pylance language server.
+>   - Path: current `.py` file.
+>   - Verify: hover/autocomplete/type diagnostics work without import errors for installed packages.
+
+#### Mac
+
+> [workflow] Verify Pylance type checking on macOS
+>
+> - Step 1: confirm the selected interpreter is the repo interpreter.
+>   - System: VS Code Python extension.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - Verify: VS Code status bar points to `.venv`.
+>
+> - Step 2: confirm type checking mode.
+>   - System: VS Code workspace settings.
+>   - Path: `.vscode/settings.json`.
+>   - Verify: `"python.analysis.typeCheckingMode": "basic"` is present.
+>
+> - Step 3: open a Python file and hover over a variable or function.
+>   - System: Pylance language server.
+>   - Path: current `.py` file.
+>   - Verify: hover/autocomplete/type diagnostics work without import errors for installed packages.
 
 ### 3.f PEP 8
 
 > [concept] **PEP 8** is Python's community style standard. It defines common naming, spacing, import, and layout conventions so Python code looks familiar across projects.
+
+> [note] PEP 8 rules are platform-independent. Windows and macOS should use the same naming, spacing, import, and formatting conventions.
 
 > [convention] Follow PEP 8 naming unless this repo later adopts a stronger local convention.
 >
@@ -1034,7 +1316,9 @@ pip install -r requirements.txt
 > - Put tests for reusable logic in `tests/`.
 > - Do not import important business/domain logic from `scripts/`; promote it into `src/` first.
 
-> [workflow] Promote a script idea into reusable code
+#### Windows
+
+> [workflow] Promote a script idea into reusable code on Windows
 > - Step 1: start in `scripts/` when the idea is still exploratory.
 >   - System: repo working files.
 >   - Path: `C:\pythonCatchup\scripts\`.
@@ -1053,6 +1337,29 @@ pip install -r requirements.txt
 > - Step 4: keep the script as a thin runner.
 >   - System: repo command layer.
 >   - Path: `C:\pythonCatchup\scripts\`.
+>   - Verify: the script mostly parses inputs, calls reusable code, and prints or saves results.
+
+#### Mac
+
+> [workflow] Promote a script idea into reusable code on macOS
+> - Step 1: start in `scripts/` when the idea is still exploratory.
+>   - System: repo working files.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/scripts/`.
+>   - Verify: the script can run directly with `uv run python scripts/<name>.py`.
+>
+> - Step 2: identify the part that should be reused.
+>   - System: Python code organization.
+>   - Path: current script file.
+>   - Verify: the reusable part can be described as a function with clear inputs and outputs.
+>
+> - Step 3: move reusable behavior into `src/catchup/`.
+>   - System: local Python package.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/src/catchup/`.
+>   - Verify: scripts or tests import it from `catchup`, not from `scripts`.
+>
+> - Step 4: keep the script as a thin runner.
+>   - System: repo command layer.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/scripts/`.
 >   - Verify: the script mostly parses inputs, calls reusable code, and prints or saves results.
 
 > [example] Shape only
@@ -1077,7 +1384,7 @@ pip install -r requirements.txt
 > >
 > > ```text
 > > # Local Qlib data location. Each engineer sets this path for their own machine.
-> > QLIB_PROVIDER_URI=C:\path\to\qlib_data
+> > QLIB_PROVIDER_URI=/path/to/qlib_data
 > >
 > > # Example only. Real secrets go in `.env`, not in `.env.example`.
 > > DATA_API_KEY=
@@ -1094,18 +1401,20 @@ pip install -r requirements.txt
 > [workflow] Create or update the environment template
 > - Step 1: add variable names to `.env.example`.
 >   - System: repo configuration template.
->   - Path: `C:\pythonCatchup\.env.example`.
+>   - Path: `.env.example`.
 >   - Verify: names are present, values are blank or fake placeholders.
 >
 > - Step 2: keep `.env` private.
 >   - System: Git ignore rules.
->   - Path: `C:\pythonCatchup\.gitignore`.
+>   - Path: `.gitignore`.
 >   - Verify: `.env` is ignored by Git.
 >
 > - Step 3: document what each variable means.
 >   - System: study notes.
->   - Path: `C:\pythonCatchup\pythonNotes.md`.
+>   - Path: `pythonNotes.md`.
 >   - Verify: the variable has a short explanation without exposing private values.
+
+#### Windows
 
 > [workflow] Set a temporary environment variable in PowerShell
 > - Step 1: set the variable for the current terminal session.
@@ -1125,11 +1434,47 @@ pip install -r requirements.txt
 >   - Path: new VS Code PowerShell terminal.
 >   - Verify: temporary variables from the old terminal do not automatically carry over.
 
+> [example] Windows `.env` value shape
+>
+> ```text
+> QLIB_PROVIDER_URI=C:\path\to\qlib_data
+> ```
+
+> [note] PowerShell temporary variables use `$env:NAME = "value"`. That changes only the current terminal process and child processes started from it.
+
+#### Mac
+
+> [workflow] Set a temporary environment variable in `zsh`
+> - Step 1: set the variable for the current terminal session.
+>   - System: `zsh` process environment.
+>   - Path: current VS Code `zsh` terminal only.
+>   - Command: `export QLIB_PROVIDER_URI="/path/to/qlib_data"`
+>   - Verify: `echo $QLIB_PROVIDER_URI` prints the same value.
+>
+> - Step 2: run Python from the same terminal.
+>   - System: `.venv` Python runtime.
+>   - Path: `.venv/bin/python`.
+>   - Command: `uv run python -c "import os; print(os.environ['QLIB_PROVIDER_URI'])"`
+>   - Verify: Python prints the value set in Step 1.
+>
+> - Step 3: open a new terminal if needed.
+>   - System: shell session state.
+>   - Path: new VS Code `zsh` terminal.
+>   - Verify: temporary variables from the old terminal do not automatically carry over.
+
+> [example] macOS `.env` value shape
+>
+> ```text
+> QLIB_PROVIDER_URI=/path/to/qlib_data
+> ```
+
+> [note] `zsh` temporary variables use `export NAME="value"`. That changes only the current terminal process and child processes started from it.
+
 > [note] Environment variables are runtime inputs. Changing an environment variable changes what the running program sees, but it does not edit Python source files.
 
 ### 3.i Section 3 Closeout
 
-> [note] Section 3 closes the repo editing standard: VS Code is the editor, `.venv` is the selected interpreter, Ruff handles formatting/checking, Pylance handles Python intelligence/type analysis, PEP 8 gives naming/style conventions, `scripts/` stays command-style, `src/` holds reusable logic, and environment variables keep local/private settings outside source code.
+> [note] Section 3 closes the repo editing standard: VS Code is the editor on both Windows and macOS, each machine selects its own local `.venv` interpreter, Ruff handles formatting/checking, Pylance handles Python intelligence/type analysis, PEP 8 gives naming/style conventions, `scripts/` stays command-style, `src/` holds reusable logic, and environment variables keep local/private settings outside source code.
 
 ## 4. Debugging Options
 
