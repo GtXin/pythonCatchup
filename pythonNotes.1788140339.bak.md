@@ -126,11 +126,15 @@ status: active
 
 > [concept] **`uv`** is a fast Python project tool: Python version manager, virtual environment creator, package installer, and command runner.
 
+> [concept] **Homebrew** is a macOS package manager, and `brew` is its executable command. The critical use: run `brew install ...` to install system-level command-line tools such as `uv` into a standard Mac location like `/opt/homebrew/bin/`, while repo packages still belong inside `.venv`.
+
 > [decision] Environment tool choice
 >
 > - Primary: `uv`
 > - Fallback: `python -m venv` + `pip`
 > - Reason: faster install, cleaner workflow, reproducible setup.
+
+#### Windows
 
 > [workflow] Choose environment tool
 >
@@ -144,9 +148,27 @@ status: active
 >   - Path: `C:\pythonCatchup\.venv\`.
 >   - Verify: `.venv` exists and `python --version` works inside the activated environment.
 
+#### Mac
+
+> [workflow] Choose environment tool on macOS
+>
+> - Step 1: use `uv` for normal setup.
+>   - System: package manager and Python environment tooling.
+>   - Path: `/opt/homebrew/bin/uv` or `~/.local/bin/uv`.
+>   - Verify: `uv --version` prints a version after opening a new terminal.
+>
+> - Step 2: use `python3 -m venv` + `pip` only if `uv` is unavailable.
+>   - System: built-in Python tooling.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Verify: `.venv` exists and `python --version` works inside the activated environment.
+
 ### 2.b Install uv
 
 > [concept] **`cmd` and PowerShell** are both Windows shells. A shell is a program that takes user commands and asks the operating system to run programs, manage files, and set environment variables. PowerShell is newer and better for scripting.
+
+> [concept] **`zsh`** is the default macOS shell. A shell is a program that takes user commands and asks the operating system to run programs, manage files, and set environment variables.
+
+#### Windows
 
 > [workflow] Install `uv`
 >
@@ -184,6 +206,49 @@ status: active
 > - If VS Code was open before install, close and reopen VS Code so its terminal sees the updated PATH.
 > - Next check after reopening PowerShell: `uv --version`
 
+#### Mac
+
+> [workflow] Install `uv` on macOS with Homebrew
+>
+> - Step 1: open Terminal.
+>   - System: macOS shell.
+>   - Path: `Terminal` using `zsh`.
+>   - Verify: terminal window is open and accepts commands.
+>
+> - Step 2: confirm Homebrew is available with `brew --version`.
+>   - System: macOS package manager.
+>   - Path: `/opt/homebrew/bin/brew` on Apple Silicon Macs.
+>   - Verify: command prints a Homebrew version.
+>
+> - Step 3: install `uv` with `brew install uv`.
+>   - System: Homebrew package install.
+>   - Path: `/opt/homebrew/bin/uv`.
+>   - Verify: install finishes without errors.
+>
+> - Step 4: verify `uv` with `uv --version`.
+>   - System: macOS command lookup.
+>   - Path: `/opt/homebrew/bin/uv`.
+>   - Verify: command prints version text with no error.
+
+> [workflow] Install `uv` on macOS without Homebrew
+>
+> - Step 1: run the official shell installer with `curl -LsSf https://astral.sh/uv/install.sh | sh`.
+>   - System: macOS shell installer process.
+>   - Path: installer URL `https://astral.sh/uv/install.sh`.
+>   - Verify: installer finishes and prints the install location.
+>
+> - Step 2: open a new terminal if `uv` is not found.
+>   - System: macOS shell PATH refresh.
+>   - Path: `~/.local/bin/uv`.
+>   - Verify: `uv --version` prints version text with no error.
+>
+> - Step 3: find the executable path.
+>   - System: macOS command lookup.
+>   - Path: `uv` executable on PATH.
+>   - Verify: `which uv` prints `/opt/homebrew/bin/uv` or `~/.local/bin/uv`.
+
+> [note] If VS Code was already open before installing `uv`, close and reopen VS Code so the integrated terminal reloads the updated PATH.
+
 ### 2.c Python Version
 
 > [concept] **Python version** matters because package compatibility, Qlib examples, and local tooling can behave differently across versions.
@@ -193,6 +258,8 @@ status: active
 > - Target: Python 3.11
 > - Minimum: Python 3.10
 > - Reason: modern enough for current tooling, conservative enough for library compatibility.
+
+#### Windows
 
 > [workflow] Install Python and confirm project interpreter
 >
@@ -229,9 +296,37 @@ status: active
 > - Side effect: `uv run` created the project virtual environment at `.venv`.
 > - PATH note: `uv` warned that `C:\Users\xinwe\.local\bin` was not active in the current shell PATH yet.
 
+#### Mac
+
+> [workflow] Install Python and confirm project interpreter on macOS
+>
+> - Step 1: install target Python with `uv python install 3.11`.
+>   - System: `uv` Python manager.
+>   - Path: `~/.local/share/uv/python/`.
+>   - Verify: install finishes with a `CPython 3.11.x` message.
+>
+> - Step 2: list available Python versions with `uv python list`.
+>   - System: `uv` Python manager.
+>   - Path: `uv` managed Python registry.
+>   - Verify: `cpython-3.11.x-macos` appears.
+>
+> - Step 3: find the installed Python path with `uv python find 3.11`.
+>   - System: `uv` Python resolver.
+>   - Path: returned `python` path under `~/.local/share/uv/python/`.
+>   - Verify: command prints a concrete Python executable path.
+>
+> - Step 4: run Python inside this repo with `uv run python --version`.
+>   - System: repo environment and `uv` command runner.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Verify: output is `Python 3.11.x`; if `.venv` does not exist, `uv run` may create it.
+
+> [note] The Mac global `python3` may be newer than the repo target. Use `uv run python` or `.venv/bin/python` for this repo instead of relying on global `python3`.
+
 ### 2.d Create Virtual Environment (optional if already created)
 
 > [concept] **Creating `.venv`** makes the repo-local Python environment explicit. In this repo, `.venv` may already exist because `uv run python --version` created it during `2.c`.
+
+#### Windows
 
 > [workflow] Create `.venv`
 >
@@ -301,9 +396,48 @@ status: active
 > - Check: `uv run python -c "import pandas as pd; print(pd.__version__)"`
 > - Result: `3.0.5`.
 
+#### Mac
+
+> [workflow] Create `.venv` on macOS
+>
+> - Step 1: create `.venv` only if missing with `uv venv --python 3.11 --prompt pythonCatchup`.
+>   - System: `uv` virtual environment creator.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Verify: command creates `.venv` with a Python 3.11 environment.
+
+> [workflow] Verify `.venv` on macOS
+>
+> - Step 1: check whether `.venv` exists.
+>   - System: filesystem.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Verify: folder exists in repo root.
+>
+> - Step 2: check the repo Python version with `uv run python --version`.
+>   - System: `uv` command runner.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Verify: output is `Python 3.11.x`.
+
+> [workflow] Activate `.venv` on macOS
+>
+> - Step 1: activate `.venv` only when running manual terminal commands.
+>   - System: `zsh` session.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/activate`.
+>   - Command: `source .venv/bin/activate`
+>   - Verify: terminal prompt shows `(pythonCatchup)`, or `python --version` prints `Python 3.11.x`.
+>
+> - Step 2: skip manual activation when using `uv run`.
+>   - System: `uv` command runner.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/`.
+>   - Command: `uv run python --version`
+>   - Verify: command runs inside the project environment.
+
+> [note] On macOS, venv executables live in `.venv/bin/`, not `.venv\Scripts\`.
+
 ### 2.e Install Dependencies
 
 > [concept] **Runtime** is the program that actually runs code. For this repo, the Python runtime should be `C:\pythonCatchup\.venv\Scripts\python.exe` or `uv run python`.
+
+> [concept] **macOS runtime path** for this repo should be `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python` or `uv run python`.
 
 > [concept] **Dependencies** are packages or tools the project environment needs. Runtime dependencies are imported by project code, like `pandas`. Developer dependencies are used by engineers and tools, like `ruff` for formatting/linting or `pytest` for tests. In this repo, both kinds can start in `requirements.txt` and install into `.venv`.
 
@@ -345,6 +479,8 @@ status: active
 > > ruff
 > > ```
 
+#### Windows
+
 > [workflow] Simple path: install dependencies from `requirements.txt`
 >
 > - Step 1: check `requirements.txt` has package names, not only comments.
@@ -371,7 +507,40 @@ status: active
 > - Result: `ok`
 > - Installed packages observed: `pandas`, `numpy`, `python-dateutil`, `six`, `tzdata`.
 
+#### Mac
+
+> [workflow] Simple path: install dependencies from `requirements.txt` on macOS
+>
+> - Step 1: check `requirements.txt` has package names, not only comments.
+>   - System: dependency manifest.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/requirements.txt`.
+>   - Verify: file contains packages such as `pandas`, `pytest`, or `ruff`.
+>
+> - Step 2: run `uv pip install -r requirements.txt`.
+>   - System: `uv` pip-compatible installer.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/requirements.txt`.
+>   - Verify: packages install into `/Users/coder/Public/EngineGit/pythonCatchup/.venv/lib/python3.11/site-packages/`.
+>
+> - Step 3: verify imports with `uv run python -c "import pandas; print('ok')"`.
+>   - System: Python import system.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/lib/python3.11/site-packages/`.
+>   - Verify: command prints `ok`.
+
+> [workflow] Project metadata path: install dependencies from `pyproject.toml` on macOS
+>
+> - Step 1: run `uv sync --dev`.
+>   - System: `uv` project dependency resolver.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/pyproject.toml`.
+>   - Verify: runtime dependency `pandas` and dev tools `pytest` and `ruff` install into `.venv`.
+>
+> - Step 2: verify tools with `uv run pytest --version` and `uv run ruff --version`.
+>   - System: repo `.venv` command tools.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/`.
+>   - Verify: both commands print versions.
+
 ### 2.f Run Commands
+
+#### Windows
 
 > [workflow] Run project commands with `uv run`
 >
@@ -407,7 +576,33 @@ status: active
 > - Result: failed because `ruff` is not installed in `.venv`.
 > - Next step: install dev tools before rerunning tests/lint/format.
 
+#### Mac
+
+> [workflow] Run project commands with `uv run` on macOS
+>
+> - Step 1: check the repo Python runtime with `uv run python --version`.
+>   - System: `uv` command runner and `.venv` Python runtime.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - Verify: output is `Python 3.11.x`.
+>
+> - Step 2: run tests with `uv run pytest`.
+>   - System: test runner.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/tests/`.
+>   - Verify: pytest starts and reports pass/fail results.
+>
+> - Step 3: run lint checks with `uv run ruff check .`.
+>   - System: Ruff linter.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: Ruff reports no issues or lists files to fix.
+>
+> - Step 4: check formatting with `uv run ruff format --check .`.
+>   - System: Ruff formatter.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: Ruff reports files are formatted or lists files needing format.
+
 ### 2.g Fallback Without uv
+
+#### Windows
 
 > [note] Use this only when `uv` is unavailable or blocked. Normal repo workflow should prefer `uv` and `uv run`.
 
@@ -418,7 +613,20 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2.h VS Code PowerShell Terminal Verification
+#### Mac
+
+> [note] Use this only when `uv` is unavailable or blocked. Normal repo workflow should prefer `uv` and `uv run`.
+
+```zsh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 2.h VS Code Terminal Verification
+
+#### Windows
 
 > [workflow] Verify repo environment from VS Code PowerShell terminal
 >
@@ -451,6 +659,47 @@ pip install -r requirements.txt
 >
 > - Command: `uv run python -c "import pandas as pd; print(pd.__version__)"`
 > - Result: `3.0.5`
+
+#### Mac
+
+> [workflow] Verify repo environment from VS Code zsh terminal
+>
+> - Step 1: open VS Code integrated terminal with `zsh`.
+>   - System: VS Code terminal.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: terminal starts in repo root, or `pwd` prints `/Users/coder/Public/EngineGit/pythonCatchup`.
+>
+> - Step 2: check `uv` is visible from VS Code with `uv --version`.
+>   - System: VS Code process PATH.
+>   - Path: `/opt/homebrew/bin/uv` or `~/.local/bin/uv`.
+>   - Verify: command prints an `uv` version.
+>
+> - Step 3: check repo Python with `uv run python -c "import sys; print(sys.executable); print(sys.version)"`.
+>   - System: `uv` command runner and `.venv` Python runtime.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/bin/python`.
+>   - Verify: executable path points inside `.venv` and version is `Python 3.11.x`.
+>
+> - Step 4: check pandas import and version with `uv run python -c "import pandas as pd; print(pd.__version__)"`.
+>   - System: Python import system.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/.venv/lib/python3.11/site-packages/`.
+>   - Verify: command prints installed pandas version.
+>
+> - Step 5: check no hardcoded local path is required.
+>   - System: repo portability.
+>   - Path: `/Users/coder/Public/EngineGit/pythonCatchup/`.
+>   - Verify: commands work from repo root using relative project files and `.venv`.
+
+> [execution] Mac prep checks before install
+>
+> - Command: `uv --version`
+> - Result: failed because `uv` is not currently on PATH.
+> - Command: `python3 --version`
+> - Result: `Python 3.14.3`
+> - Command: `which python3`
+> - Result: `/opt/homebrew/bin/python3`
+> - Command: `which brew`
+> - Result: `/opt/homebrew/bin/brew`
+> - Next step: install `uv`, then use `uv` to install Python 3.11 for this repo.
 
 ## 3. VS Code IDE Setup And Code Standards
 
@@ -3506,6 +3755,17 @@ pip install -r requirements.txt
 > > ```
 > >
 > > A factor is not automatically alpha. It must be tested.
+>
+> > [concept] **Feature vs factor**: a feature is any model input column; a factor is a finance/quant signal with an economic or statistical hypothesis about future returns. A factor used in a model becomes a feature, but not every feature is a meaningful factor.
+> >
+> > [example] Feature/factor distinction
+> >
+> > ```text
+> > momentum_5d        -> factor and feature if fed into model
+> > volume_zscore      -> factor-like feature
+> > day_of_week        -> feature, not necessarily a finance factor
+> > missing_value_flag -> feature for data quality, not a return factor
+> > ```
 
 ### 7.e Alpha
 
@@ -3589,7 +3849,7 @@ pip install -r requirements.txt
 > >
 > > Maximum drawdown is the worst peak-to-trough decline over a period.
 
-### 7.k Information Coefficient
+### 7.k Information Coefficient 
 
 > [concept] **Information Coefficient (IC)** measures correlation between a signal and future return. The critical use: IC checks whether higher signal scores tend to correspond to higher future returns.
 >

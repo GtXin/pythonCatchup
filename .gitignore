@@ -1,4 +1,7 @@
+# Local Python virtual environments; each OS creates its own.
 .venv/
+venv/
+env/
 __pycache__/
 *.py[cod]
 .pytest_cache/

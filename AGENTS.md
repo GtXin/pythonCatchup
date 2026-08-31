@@ -21,6 +21,15 @@ This repo is a Python and Qlib catch-up workspace. The main learning artifact is
 - Keep only the latest `pythonNotes.md` backup.
 - This backup rule applies only to `pythonNotes.md`, not to `AGENTS.md`, `README.md`, or other Markdown files.
 
+## Memory Log Rule
+
+- Use `codexMemeory.md` as the repo memory log for durable session notes, decisions, mistakes, commands, and verification results.
+- Add or update memory log entries only when the current task creates useful context for future sessions.
+- Keep memory log entries short, concrete, and organized by date or task.
+- Do not log private secrets, credentials, API keys, access tokens, or machine-specific paths that should not be reused.
+- When Codex runs live commands that create useful future context, record the command, observed result, and next verification step in `codexMemeory.md`.
+- The `pythonNotes.md` backup rule does not apply to `codexMemeory.md`.
+
 ## Editing Rules
 
 - Keep Python examples small and runnable.
